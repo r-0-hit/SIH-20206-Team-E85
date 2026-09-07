@@ -100,15 +100,27 @@ export const analyzeThermalSource = async (req: AuthRequest, res: Response) => {
       ]
     );
 
-    // 4. Fire-and-forget: SMS alert if high-risk (does not block HTTP response)
+    // 4. Fire-and-forget: Alert ONLY if there is a true sudden spike / emergency surge
     notificationService.evaluateAndNotify({
       analysisId,
       lat: input.lat,
       lon: input.lon,
       classification: mlResult.classification,
       riskScore: mlResult.risk_score,
-      nearestFacilityName: mlResult.nearest_facility.name,
-      facilityType: mlResult.nearest_facility.type,
+      nearestFacilityName: mlResult.nearest_facility?.name || '',
+      facilityType: mlResult.nearest_facility?.type || '',
+      frp: input.frp,
+      distanceKm: mlResult.nearest_facility?.distance_km,
+      isIndustrial: mlResult.is_industrial,
+      anomalyRatio: mlResult.thermal_twin?.anomaly_ratio || mlResult.persistence?.frp_surge_ratio || 1.0,
+      zScore: mlResult.thermal_twin?.z_score || 0.0,
+      expectedFrp: mlResult.thermal_twin?.expected_frp,
+      isAnomalousSurge: Boolean(
+        mlResult.persistence?.is_anomalous_surge ||
+        mlResult.thermal_twin?.anomaly_severity === 'ANOMALOUS' ||
+        mlResult.thermal_twin?.anomaly_severity === 'EXTREME' ||
+        (mlResult.thermal_twin?.anomaly_ratio && mlResult.thermal_twin.anomaly_ratio >= 2.0)
+      ),
     });
 
     return res.status(201).json({
@@ -422,15 +434,27 @@ export const fetchFIRMSSwath = async (req: AuthRequest, res: Response) => {
         // Continue gracefully if table constraint triggers
       }
 
-      // Fire-and-forget: SMS alert for high-risk FIRMS detections
+      // Fire-and-forget: Alert ONLY if there is a true sudden spike / emergency surge
       notificationService.evaluateAndNotify({
         analysisId,
         lat: raw.lat,
         lon: raw.lon,
         classification: ml.classification,
         riskScore: ml.risk_score,
-        nearestFacilityName: ml.nearest_facility.name,
-        facilityType: ml.nearest_facility.type,
+        nearestFacilityName: ml.nearest_facility?.name || '',
+        facilityType: ml.nearest_facility?.type || '',
+        frp: raw.frp,
+        distanceKm: ml.nearest_facility?.distance_km,
+        isIndustrial: ml.is_industrial,
+        anomalyRatio: ml.thermal_twin?.anomaly_ratio || ml.persistence?.frp_surge_ratio || 1.0,
+        zScore: ml.thermal_twin?.z_score || 0.0,
+        expectedFrp: ml.thermal_twin?.expected_frp,
+        isAnomalousSurge: Boolean(
+          ml.persistence?.is_anomalous_surge ||
+          ml.thermal_twin?.anomaly_severity === 'ANOMALOUS' ||
+          ml.thermal_twin?.anomaly_severity === 'EXTREME' ||
+          (ml.thermal_twin?.anomaly_ratio && ml.thermal_twin.anomaly_ratio >= 2.0)
+        ),
       });
 
       analyzedAnomalies.push({
@@ -461,4 +485,124 @@ export const fetchFIRMSSwath = async (req: AuthRequest, res: Response) => {
     });
   }
 };
+
+export const getAlertStatus = async (_req: Request, res: Response) => {
+  return res.json({
+    success: true,
+    data: notificationService.getStatus(),
+  });
+};
+
+export const sendTestAlertPing = async (_req: Request, res: Response) => {
+  try {
+    const result = await notificationService.sendTestPing();
+    if (result.success) {
+      return res.json({
+        success: true,
+        message: 'Live test ping sent to Telegram successfully!',
+        data: result,
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: result.error || 'Failed to dispatch test ping to Telegram.',
+      });
+    }
+  } catch (err: any) {
+    return res.status(500).json({
+      success: false,
+      message: err.message || 'Error executing Telegram test ping.',
+    });
+  }
+};
+
+export const dispatchIncidentAlert = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const record = await getOne<any>('SELECT * FROM analyses WHERE id = ?', [id]);
+
+    if (!record) {
+      return res.status(404).json({
+        success: false,
+        message: `Incident ${id} was not found.`,
+      });
+    }
+
+    const result = await notificationService.dispatchManualAlert({
+      analysisId: record.id,
+      lat: record.lat,
+      lon: record.lon,
+      classification: record.classification,
+      riskScore: record.risk_score,
+      nearestFacilityName: record.nearest_facility_name || '',
+      facilityType: '',
+      frp: record.frp,
+      distanceKm: record.nearest_facility_dist_km,
+      isIndustrial: Boolean(record.is_industrial),
+    });
+
+    if (result.success) {
+      return res.json({
+        success: true,
+        message: `Telegram emergency alert dispatched for ${id}!`,
+        data: result,
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: result.error || 'Failed to dispatch alert to Telegram.',
+      });
+    }
+  } catch (err: any) {
+    return res.status(500).json({
+      success: false,
+      message: err.message || 'Error dispatching incident alert.',
+    });
+  }
+};
+
+export const dispatchCustomAlert = async (req: Request, res: Response) => {
+  try {
+    const { lat, lon, frp, brightness, nearestFacilityName, facilityType, classification, riskScore } = req.body;
+
+    if (lat === undefined || lon === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: 'Latitude and Longitude are required.',
+      });
+    }
+
+    const analysisId = `MANUAL-ALERT-${Date.now()}`;
+    const result = await notificationService.dispatchManualAlert({
+      analysisId,
+      lat: Number(lat),
+      lon: Number(lon),
+      classification: classification || 'MANUAL_EMERGENCY_ALERT',
+      riskScore: Number(riskScore) || 92,
+      nearestFacilityName: nearestFacilityName || 'Manual Operator Pin',
+      facilityType: facilityType || 'industrial',
+      frp: frp !== undefined ? Number(frp) : undefined,
+    });
+
+    if (result.success) {
+      return res.json({
+        success: true,
+        message: `Telegram alert dispatched for [${lat}, ${lon}]!`,
+        data: result,
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: result.error || 'Failed to dispatch alert to Telegram.',
+      });
+    }
+  } catch (err: any) {
+    return res.status(500).json({
+      success: false,
+      message: err.message || 'Error dispatching manual alert.',
+    });
+  }
+};
+
+
 

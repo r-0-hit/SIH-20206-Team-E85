@@ -16,10 +16,12 @@ import {
   X,
   Filter,
   Check,
+  Send,
 } from 'lucide-react';
 import { Detection, Facility } from '../../types/index';
 import { RiskBadge } from '../common/RiskBadge';
 import { RiskMeter } from '../common/RiskMeter';
+import { detectionService } from '../../services/detectionService';
 
 interface GISMapProps {
   detections: Detection[];
@@ -27,6 +29,7 @@ interface GISMapProps {
   selectedDetection?: Detection | null;
   onSelectDetection?: (detection: Detection) => void;
   onRunWhatIf?: () => void;
+  onRefresh?: () => void;
   height?: string;
   center?: [number, number];
   zoom?: number;
@@ -115,6 +118,7 @@ export const GISMap: React.FC<GISMapProps> = ({
   selectedDetection: externalSelected,
   onSelectDetection,
   onRunWhatIf,
+  onRefresh,
   height = '620px',
   center = [23.5937, 78.9629],
   zoom = 5,
@@ -139,6 +143,39 @@ export const GISMap: React.FC<GISMapProps> = ({
   const [filterLow, setFilterLow] = useState(true);
   const [filterIndustrialOnly, setFilterIndustrialOnly] = useState(false);
 
+  // Manual Alert State
+  const [alertingId, setAlertingId] = useState<string | null>(null);
+  const [mapAlertToast, setMapAlertToast] = useState<string | null>(null);
+
+  const handleQuickAlert = async (target: any) => {
+    const id = target.id || `${target.lat},${target.lon}`;
+    setAlertingId(id);
+    try {
+      if (target.id && !String(target.id).startsWith('MANUAL') && !String(target.id).startsWith('IND')) {
+        const res = await detectionService.dispatchIncidentAlert(target.id);
+        setMapAlertToast(res.message || 'Telegram alert dispatched!');
+      } else {
+        const res = await detectionService.dispatchCustomAlert({
+          lat: target.lat,
+          lon: target.lon,
+          frp: target.frp,
+          brightness: target.brightness,
+          nearestFacilityName: target.name || target.nearestFacilityName || target.nearest_facility_name,
+          facilityType: target.type || target.facilityType,
+          classification: target.classification || 'MANUAL_FACILITY_ALERT',
+          riskScore: target.risk_score || target.riskScore || 92,
+        });
+        setMapAlertToast(res.message || 'Telegram alert dispatched!');
+      }
+      setTimeout(() => setMapAlertToast(null), 5000);
+    } catch (err: any) {
+      setMapAlertToast(err.message || 'Failed to dispatch Telegram alert');
+      setTimeout(() => setMapAlertToast(null), 5000);
+    } finally {
+      setAlertingId(null);
+    }
+  };
+
   useEffect(() => {
     if (externalSelected) {
       setSelectedAnomaly(externalSelected);
@@ -146,7 +183,7 @@ export const GISMap: React.FC<GISMapProps> = ({
   }, [externalSelected]);
 
   const tileUrls = {
-    dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    dark: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
     satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     street: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
   };
@@ -167,6 +204,9 @@ export const GISMap: React.FC<GISMapProps> = ({
 
   const handleManualRefresh = () => {
     setIsRefreshing(true);
+    if (onRefresh) {
+      onRefresh();
+    }
     setTimeout(() => {
       const now = new Date();
       setLastUpdatedTime(`${now.getUTCHours().toString().padStart(2, '0')}:${now.getUTCMinutes().toString().padStart(2, '0')} UTC`);
@@ -285,9 +325,9 @@ export const GISMap: React.FC<GISMapProps> = ({
           />
 
           <TileLayer
-            attribution='&copy; <a href="https://carto.com/">CARTO</a> & NASA FIRMS'
+            attribution='&copy; <a href="https://www.esri.com/">Esri</a>, OpenStreetMap & NASA FIRMS'
             url={tileUrls[mapLayer]}
-            maxZoom={19}
+            maxZoom={18}
           />
 
           {/* ── Industrial Facilities & Hazard Buffer Layer ────────────────── */}
@@ -310,6 +350,17 @@ export const GISMap: React.FC<GISMapProps> = ({
                       <p className="text-slate-400">
                         Hazard Radius: <span className="font-mono text-amber-400">{fac.buffer_km} km</span>
                       </p>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleQuickAlert(fac);
+                        }}
+                        disabled={alertingId === fac.id}
+                        className="w-full mt-2 py-1.5 rounded-lg bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-[10px] flex items-center justify-center gap-1.5 transition shadow-sm disabled:opacity-50"
+                      >
+                        <Send className="w-3 h-3" />
+                        <span>{alertingId === fac.id ? 'Sending...' : '📢 Send Telegram Alert'}</span>
+                      </button>
                     </div>
                   </Popup>
                 </Marker>
@@ -418,12 +469,34 @@ export const GISMap: React.FC<GISMapProps> = ({
                       >
                         <Eye className="w-3 h-3" /> Inspect Anomaly
                       </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleQuickAlert(d);
+                        }}
+                        disabled={alertingId === d.id}
+                        className="w-full py-1 rounded bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-[10px] flex items-center justify-center gap-1 transition shadow-sm disabled:opacity-50"
+                      >
+                        <Send className="w-3 h-3" />
+                        <span>{alertingId === d.id ? 'Sending...' : '📢 Send Telegram Alert'}</span>
+                      </button>
                     </div>
                   </Popup>
                 </Marker>
               );
             })}
         </MapContainer>
+
+        {/* Floating In-Map Toast for Manual Alert Feedback */}
+        {mapAlertToast && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1002] px-4 py-2 rounded-xl bg-sky-950/95 border border-sky-500/80 text-sky-200 text-xs font-semibold shadow-2xl flex items-center gap-2.5 animate-bounce">
+            <Send className="w-4 h-4 text-sky-400 shrink-0" />
+            <span>{mapAlertToast}</span>
+            <button onClick={() => setMapAlertToast(null)} className="ml-2 text-slate-400 hover:text-white">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
 
         {/* ── Layer Controls & Filter Popover Drawer ────────────────────────── */}
         {showLayerMenu && (

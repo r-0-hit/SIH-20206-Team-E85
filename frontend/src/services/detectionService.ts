@@ -86,5 +86,46 @@ export const detectionService = {
   async getUsers(): Promise<any[]> {
     return apiRequest<any[]>('/admin/users');
   },
+
+  async getAlertStatus(): Promise<{
+    enabled: boolean;
+    provider: string;
+    riskThreshold: number;
+    recipientsCount: number;
+    recipients: string[];
+    botName: string;
+    botUrl: string;
+    spikeRule: string;
+  }> {
+    return apiRequest<any>('/detections/alerts/status');
+  },
+
+  async sendTestAlertPing(): Promise<{ success: boolean; message: string }> {
+    return apiRequest<any>('/detections/alerts/test-ping', {
+      method: 'POST',
+    });
+  },
+
+  async dispatchIncidentAlert(id: string): Promise<{ success: boolean; message: string }> {
+    return apiRequest<any>(`/detections/${id}/dispatch-alert`, {
+      method: 'POST',
+    });
+  },
+
+  async dispatchCustomAlert(payload: {
+    lat: number;
+    lon: number;
+    frp?: number;
+    brightness?: number;
+    nearestFacilityName?: string;
+    facilityType?: string;
+    classification?: string;
+    riskScore?: number;
+  }): Promise<{ success: boolean; message: string; data?: any }> {
+    return apiRequest<any>('/detections/alerts/dispatch-custom', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
 };
 

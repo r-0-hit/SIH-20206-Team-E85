@@ -1,6 +1,7 @@
-import React from 'react';
-import { Flame, ShieldAlert, User as UserIcon, LogOut, Radio } from 'lucide-react';
+import React, { useState } from 'react';
+import { Flame, ShieldAlert, User as UserIcon, LogOut, Radio, Send } from 'lucide-react';
 import { User } from '../../types/index';
+import { TelegramAlertModal } from './TelegramAlertModal';
 
 interface NavbarProps {
   currentUser: User | null;
@@ -17,6 +18,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   activePage,
   activeCriticalCount,
 }) => {
+  const [showTelegramModal, setShowTelegramModal] = useState(false);
+
   return (
     <header className="sticky top-0 z-50 bg-[#0c121e]/90 backdrop-blur-md border-b border-slate-800/80 px-4 lg:px-8 py-3 transition-all">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -60,6 +63,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>SATELLITE TELEMETRY NORMAL</span>
             </div>
           )}
+
+          {/* Telegram Alert Channel Button */}
+          <button
+            onClick={() => setShowTelegramModal(true)}
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-sky-950/80 via-blue-950/70 to-slate-900 hover:from-sky-900/80 hover:to-blue-900/80 border border-sky-500/50 text-sky-300 text-xs font-bold transition-all shadow-[0_0_15px_rgba(14,165,233,0.2)] hover:shadow-[0_0_20px_rgba(14,165,233,0.4)] group"
+            title="Open Telegram Emergency Alert Console to select a place and broadcast alerts"
+          >
+            <Send className="w-3.5 h-3.5 text-cyan-400 group-hover:scale-110 transition-transform" />
+            <span className="hidden sm:inline font-normal text-slate-300">Alerts:</span>
+            <span className="text-cyan-200">📢 Send Alert (Telegram)</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          </button>
         </div>
 
         {/* Right User & Actions */}
@@ -102,6 +117,11 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
         </div>
       </div>
+
+      <TelegramAlertModal
+        isOpen={showTelegramModal}
+        onClose={() => setShowTelegramModal(false)}
+      />
     </header>
   );
 };

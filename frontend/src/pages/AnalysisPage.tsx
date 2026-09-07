@@ -9,6 +9,7 @@ import {
   Upload,
   ArrowRight,
   Sparkles,
+  Send,
 } from 'lucide-react';
 import { detectionService } from '../services/detectionService';
 import { Detection } from '../types/index';
@@ -29,10 +30,42 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({ onAnalysisComplete, 
   const [confidence, setConfidence] = useState<string>('high');
 
   const [loading, setLoading] = useState<boolean>(false);
+  const [manualAlerting, setManualAlerting] = useState<boolean>(false);
   const [swathLoading, setSwathLoading] = useState<boolean>(false);
   const [swathRegion, setSwathRegion] = useState<string>('South Asia');
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  const handleManualTelegramAlert = async () => {
+    setManualAlerting(true);
+    setError(null);
+    setSuccessMsg(null);
+    try {
+      const parsedLat = parseFloat(lat);
+      const parsedLon = parseFloat(lon);
+      const parsedBrightness = parseFloat(brightness);
+      const parsedFrp = parseFloat(frp);
+
+      if (isNaN(parsedLat) || isNaN(parsedLon)) {
+        throw new Error('Valid coordinates are required.');
+      }
+
+      const res = await detectionService.dispatchCustomAlert({
+        lat: parsedLat,
+        lon: parsedLon,
+        frp: parsedFrp || undefined,
+        brightness: parsedBrightness || undefined,
+        classification: 'MANUAL_OPERATOR_ALERT',
+        riskScore: parsedFrp > 100 ? 95 : 85,
+      });
+
+      setSuccessMsg(res.message || `Telegram emergency alert dispatched for coordinates [${parsedLat}, ${parsedLon}]!`);
+    } catch (err: any) {
+      setError(err.message || 'Failed to dispatch manual Telegram alert.');
+    } finally {
+      setManualAlerting(false);
+    }
+  };
 
   // Scenario Presets for instant evaluation
   const presets = [
@@ -172,6 +205,27 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({ onAnalysisComplete, 
           </button>
         </div>
       )}
+
+      {/* Telegram Alerts Status Banner */}
+      <div className="p-4 rounded-2xl bg-sky-950/40 border border-sky-800/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-sky-500/20 border border-sky-500/40 flex items-center justify-center text-sky-400 shrink-0">
+            <Send className="w-4 h-4" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-sky-200">Telegram Alert Channel Active (@pyroguard_alerts_soham_bot)</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            </div>
+            <p className="text-slate-300 text-[11px] mt-0.5">
+              Refineries (Jamnagar, Panipat) continuous flaring is suppressed. Alerts are sent <strong>automatically on sudden thermal spikes</strong> or <strong>manually via the button below</strong>.
+            </p>
+          </div>
+        </div>
+        <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold text-[10px] font-mono shrink-0">
+          ● REAL-TIME DISPATCH READY
+        </span>
+      </div>
 
       {/* Scenario Presets Bar */}
       <div className="space-y-3">
@@ -333,14 +387,25 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({ onAnalysisComplete, 
               </div>
             </div>
 
-            <div className="pt-2">
+            <div className="pt-2 flex flex-col sm:flex-row gap-3">
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-bold text-xs transition shadow-lg shadow-rose-600/30 flex items-center justify-center gap-2 disabled:opacity-50"
+                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-bold text-xs transition shadow-lg shadow-rose-600/30 flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <Zap className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                 <span>{loading ? 'Executing AI Inference & GIS Query...' : 'Run Real-Time AI Classification'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleManualTelegramAlert}
+                disabled={manualAlerting}
+                className="py-3 px-5 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs transition shadow-lg shadow-sky-600/30 flex items-center justify-center gap-2 disabled:opacity-50"
+                title="Immediately broadcast an emergency alert to Telegram for these exact coordinates"
+              >
+                <Send className={`w-4 h-4 ${manualAlerting ? 'animate-spin' : ''}`} />
+                <span>{manualAlerting ? 'Alerting...' : '📢 Send Telegram Alert'}</span>
               </button>
             </div>
           </form>

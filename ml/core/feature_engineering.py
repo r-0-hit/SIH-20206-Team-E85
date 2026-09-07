@@ -83,6 +83,8 @@ def extract_features(
         pers_eval = _persistence_tracker.evaluate_persistence(lat, lon, frp)
         p_score = pers_eval["persistence_score"]
 
+    frp_ratio = pers_eval.get("frp_surge_ratio", 1.0)
+
     # 5. Facility Digital Twin Anomaly Evaluation
     from ml.core.thermal_twin import detect_facility_anomaly
     twin_fac_id = land_cover_info["nearest_facility_id"]

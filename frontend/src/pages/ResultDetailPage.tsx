@@ -15,6 +15,8 @@ import {
   CheckCircle,
   Activity,
   Sliders,
+  Send,
+  X,
 } from 'lucide-react';
 import { Detection } from '../types/index';
 import { RiskBadge } from '../components/common/RiskBadge';
@@ -41,9 +43,26 @@ export const ResultDetailPage: React.FC<ResultDetailPageProps> = ({
   const [completedSop, setCompletedSop] = useState<Record<number, boolean>>({});
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
   const [showSimulator, setShowSimulator] = useState<boolean>(false);
+  const [dispatchingAlert, setDispatchingAlert] = useState<boolean>(false);
+  const [alertFeedback, setAlertFeedback] = useState<string | null>(null);
 
   const toggleSop = (index: number) => {
     setCompletedSop((prev) => ({ ...prev, [index]: !prev[index] }));
+  };
+
+  const handleDispatchTelegramAlert = async () => {
+    setDispatchingAlert(true);
+    setAlertFeedback(null);
+    try {
+      const res = await detectionService.dispatchIncidentAlert(detection.id);
+      setAlertFeedback(res.message || 'Telegram emergency alert dispatched successfully!');
+      setTimeout(() => setAlertFeedback(null), 5000);
+    } catch (err: any) {
+      setAlertFeedback(err.message || 'Failed to dispatch Telegram alert.');
+      setTimeout(() => setAlertFeedback(null), 5000);
+    } finally {
+      setDispatchingAlert(false);
+    }
   };
 
   const handleStatusChange = async (newStatus: string) => {
@@ -122,6 +141,17 @@ export const ResultDetailPage: React.FC<ResultDetailPageProps> = ({
             </select>
           </div>
 
+          {/* STANDOUT: Manual Telegram Alert Button */}
+          <button
+            onClick={handleDispatchTelegramAlert}
+            disabled={dispatchingAlert}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white text-xs font-bold transition shadow-md shadow-sky-500/20 disabled:opacity-50"
+            title="Immediately send Telegram emergency alert for this specific incident location"
+          >
+            <Send className={`w-3.5 h-3.5 ${dispatchingAlert ? 'animate-spin' : ''}`} />
+            <span>{dispatchingAlert ? 'Sending Alert...' : '📢 Send Telegram Alert'}</span>
+          </button>
+
           <button
             onClick={() => window.print()}
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition border border-slate-700"
@@ -131,6 +161,19 @@ export const ResultDetailPage: React.FC<ResultDetailPageProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Manual Alert Feedback Toast */}
+      {alertFeedback && (
+        <div className="p-3 rounded-xl bg-sky-950/80 border border-sky-600/80 text-sky-200 text-xs flex items-center justify-between shadow-lg shadow-sky-950/50 animate-fadeIn">
+          <div className="flex items-center gap-2.5 font-medium">
+            <Send className="w-4 h-4 text-sky-400 shrink-0" />
+            <span>{alertFeedback}</span>
+          </div>
+          <button onClick={() => setAlertFeedback(null)} className="text-slate-400 hover:text-white p-1">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Top Threat Gauge & Key Telemetry Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

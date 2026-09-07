@@ -138,6 +138,7 @@ export const App: React.FC = () => {
               detections={detections}
               facilities={facilities}
               onInspectDetection={handleSelectDetection}
+              onRefresh={loadInitialData}
             />
           )}
 

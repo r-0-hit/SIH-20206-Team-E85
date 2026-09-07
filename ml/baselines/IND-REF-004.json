@@ -1,0 +1,15 @@
+{
+    "facility_id": "IND-REF-004",
+    "mean_frp_by_hour": {
+        "12": 380.0,
+        "21": 470.0
+    },
+    "std_frp_by_hour": {
+        "12": 10.0,
+        "21": 104.24
+    },
+    "overall_mean": 470.0,
+    "overall_std": 10.0,
+    "daily_frequency": 0.1,
+    "sample_count": 3
+}

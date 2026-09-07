@@ -19,12 +19,14 @@ interface MapExplorerPageProps {
   detections: Detection[];
   facilities: Facility[];
   onInspectDetection: (detection: Detection) => void;
+  onRefresh?: () => void;
 }
 
 export const MapExplorerPage: React.FC<MapExplorerPageProps> = ({
   detections,
   facilities,
   onInspectDetection,
+  onRefresh,
 }) => {
   const [selectedAnomaly, setSelectedAnomaly] = useState<Detection | null>(null);
   const [activeFilter, setActiveFilter] = useState<string>('ALL');
@@ -79,6 +81,7 @@ export const MapExplorerPage: React.FC<MapExplorerPageProps> = ({
           facilities={facilities}
           selectedDetection={selectedAnomaly}
           onSelectDetection={(d) => setSelectedAnomaly(d)}
+          onRefresh={onRefresh}
           height="100%"
           zoom={5}
         />
