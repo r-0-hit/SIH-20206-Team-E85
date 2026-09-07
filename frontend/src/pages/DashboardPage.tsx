@@ -1,9 +1,7 @@
 import React from 'react';
 import {
-  Flame,
   Factory,
   Trees,
-  Wheat,
   ShieldAlert,
   Gauge,
   Satellite,
@@ -11,11 +9,17 @@ import {
   Eye,
   RefreshCw,
   PlusCircle,
+  Radar,
 } from 'lucide-react';
 import { AnalyticsSummary, Detection, Facility } from '../types/index';
 import { StatCard } from '../components/common/StatCard';
 import { RiskBadge } from '../components/common/RiskBadge';
 import { GISMap } from '../components/map/GISMap';
+import { PageHeader } from '../components/ui/PageHeader';
+import { Sheet, SheetHead } from '../components/ui/Sheet';
+import { TitleBlock } from '../components/ui/TitleBlock';
+import { EmptyState } from '../components/ui/EmptyState';
+import { StatSkeleton } from '../components/ui/Skeleton';
 
 interface DashboardPageProps {
   analytics: AnalyticsSummary | null;
@@ -26,6 +30,9 @@ interface DashboardPageProps {
   onRefresh: () => void;
   loading: boolean;
 }
+
+const riskTag = (score: number) =>
+  score >= 80 ? 'tag-danger' : score >= 60 ? 'tag-warn' : 'tag-ok';
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({
   analytics,
@@ -38,108 +45,99 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 }) => {
   const summary = analytics?.summary;
 
+  const priority = detections
+    .filter((d) => d.risk_score >= 70 || d.classification === 'INDUSTRIAL_ACCIDENTAL_FIRE')
+    .slice(0, 4);
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto px-4 lg:px-8 py-6">
-      {/* Top Banner & Quick Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800/80">
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-extrabold text-white tracking-tight">
-            Thermal Intelligence Overview
-          </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Real-time geospatial classification of industrial facilities, operational flares, and wildfire anomalies.
-          </p>
-        </div>
+    <div className="page-shell space-y-6">
+      <PageHeader
+        sheet="DWG 01"
+        title="Thermal Intelligence Overview"
+        description="Real-time geospatial classification of industrial facilities, operational flares and wildfire anomalies."
+        actions={
+          <>
+            <button onClick={onRefresh} disabled={loading} className="btn-secondary">
+              <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+              Refresh telemetry
+            </button>
+            <button onClick={() => onNavigate('analyze')} className="btn-primary">
+              <PlusCircle className="h-3.5 w-3.5" />
+              Submit observation
+            </button>
+          </>
+        }
+      />
 
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onRefresh}
-            disabled={loading}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-200 text-xs font-semibold transition"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-            <span>Refresh Telemetry</span>
-          </button>
-
-          <button
-            onClick={() => onNavigate('analyze')}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white text-xs font-bold transition shadow-lg shadow-rose-600/20"
-          >
-            <PlusCircle className="w-3.5 h-3.5" />
-            <span>Submit Observation</span>
-          </button>
-        </div>
+      {/* KPI schedule */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        {loading && !summary ? (
+          Array.from({ length: 5 }).map((_, i) => <StatSkeleton key={i} />)
+        ) : (
+          <>
+            <StatCard
+              title="Total monitored"
+              value={summary?.totalAnalyses ?? detections.length}
+              subtitle="All satellite swaths"
+              icon={<Satellite className="h-4 w-4" />}
+              accentColor="bg-blueprint"
+              trend="+14% this week"
+              trendPositive
+            />
+            <StatCard
+              title="Industrial fires"
+              value={summary?.industrialAccidents ?? 0}
+              subtitle="High-risk accidental"
+              icon={<ShieldAlert className="h-4 w-4" />}
+              accentColor="bg-risk-critical"
+              trend="Emergency priority"
+              trendPositive={false}
+              onClick={() => onNavigate('history')}
+            />
+            <StatCard
+              title="Persistent flares"
+              value={summary?.industrialPersistent ?? 0}
+              subtitle="Operational facilities"
+              icon={<Factory className="h-4 w-4" />}
+              accentColor="bg-steel"
+              trend="Routine flaring"
+              trendPositive
+            />
+            <StatCard
+              title="Wildfires & biomass"
+              value={(summary?.wildfires ?? 0) + (summary?.agriculturalFires ?? 0)}
+              subtitle="Forest & crop residue"
+              icon={<Trees className="h-4 w-4" />}
+              accentColor="bg-signal"
+              trend="Vegetation fuel index"
+              trendPositive
+            />
+            <StatCard
+              title="Average risk index"
+              value={`${summary?.avgRiskScore ?? 0}/100`}
+              subtitle="Composite hazard metric"
+              icon={<Gauge className="h-4 w-4" />}
+              accentColor="bg-ink"
+            />
+          </>
+        )}
       </div>
 
-      {/* KPI Telemetry Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <StatCard
-          title="Total Monitored"
-          value={summary?.totalAnalyses ?? detections.length}
-          subtitle="All satellite swaths"
-          icon={<Satellite className="w-5 h-5 text-blue-400" />}
-          accentColor="bg-blue-500"
-          trend="+14% this week"
-          trendPositive={true}
-        />
-
-        <StatCard
-          title="Industrial Fires"
-          value={summary?.industrialAccidents ?? 0}
-          subtitle="High-risk accidental fires"
-          icon={<ShieldAlert className="w-5 h-5 text-rose-500" />}
-          accentColor="bg-rose-500"
-          trend="Emergency priority"
-          trendPositive={false}
-          onClick={() => onNavigate('history')}
-        />
-
-        <StatCard
-          title="Persistent Flares"
-          value={summary?.industrialPersistent ?? 0}
-          subtitle="Operational facilities"
-          icon={<Factory className="w-5 h-5 text-purple-400" />}
-          accentColor="bg-purple-500"
-          trend="Routine flaring"
-          trendPositive={true}
-        />
-
-        <StatCard
-          title="Wildfires & Biomass"
-          value={(summary?.wildfires ?? 0) + (summary?.agriculturalFires ?? 0)}
-          subtitle="Forest & crop residue"
-          icon={<Trees className="w-5 h-5 text-orange-400" />}
-          accentColor="bg-orange-500"
-          trend="Vegetation fuel index"
-          trendPositive={true}
-        />
-
-        <StatCard
-          title="Average Risk Index"
-          value={`${summary?.avgRiskScore ?? 62}/100`}
-          subtitle="Composite hazard metric"
-          icon={<Gauge className="w-5 h-5 text-amber-400" />}
-          accentColor="bg-amber-500"
-        />
-      </div>
-
-      {/* Main Interactive GIS Preview & Incident Feed */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Cols: Interactive Map */}
-        <div className="lg:col-span-2 space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-white">Live GIS Thermal Anomaly Map</h2>
-              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                MULTI-LAYER
-              </span>
-            </div>
+      {/* Plan view + incident register */}
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
+        <div className="space-y-3 xl:col-span-2">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="panel-title">
+              <Radar className="h-4 w-4 text-signal" />
+              Live GIS thermal anomaly map
+              <span className="tag-blueprint ml-1">MULTI-LAYER</span>
+            </h2>
             <button
               onClick={() => onNavigate('map')}
-              className="text-xs font-semibold text-blue-400 hover:text-blue-300 flex items-center gap-1 transition"
+              className="group inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-wider text-blueprint hover:text-signal"
             >
-              <span>Full Screen GIS Console</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              Full screen
+              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-150 group-hover:translate-x-0.5" />
             </button>
           </div>
 
@@ -147,192 +145,207 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             detections={detections}
             facilities={facilities}
             onSelectDetection={onSelectDetection}
-            height="440px"
+            height="460px"
             zoom={5}
           />
         </div>
 
-        {/* Right 1 Col: Critical Hazards & Quick Actions */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 text-rose-500" />
-              <span>Priority Incidents</span>
-            </h2>
-            <button
-              onClick={() => onNavigate('history')}
-              className="text-xs text-slate-400 hover:text-white"
-            >
-              View All
-            </button>
-          </div>
-
-          {/* STANDOUT: Forward Escalation Alerts Feed */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
-                <span className="text-rose-400">Escalation Trajectory Alerts</span>
-              </h2>
-              <button
-                onClick={() => onNavigate('prediction')}
-                className="text-[11px] font-semibold text-indigo-400 hover:text-indigo-300"
-              >
-                What-If Sim →
-              </button>
-            </div>
-            <div className="p-3 rounded-xl bg-gradient-to-r from-red-950/40 via-slate-900 to-indigo-950/30 border border-red-800/50 space-y-1.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-red-300 flex items-center gap-1.5">
-                  🔴 Jamnagar Petrochemical Sector
+        <div className="space-y-5">
+          {/* Escalation notice */}
+          <Sheet className="p-0" tab>
+            <SheetHead
+              title="Escalation trajectory"
+              icon={<span className="h-2 w-2 animate-blink bg-risk-critical" />}
+              actions={
+                <button
+                  onClick={() => onNavigate('prediction')}
+                  className="font-mono text-[10px] font-bold uppercase tracking-wider text-blueprint hover:text-signal"
+                >
+                  What-if →
+                </button>
+              }
+            />
+            <div className="p-4">
+              <div className="flex items-start justify-between gap-3">
+                <span className="font-display text-sm font-extrabold uppercase text-ink">
+                  Jamnagar petrochemical sector
                 </span>
-                <span className="font-mono font-extrabold text-red-400 bg-red-950 px-1.5 py-0.5 rounded border border-red-800">
-                  94/100 in 2hr
-                </span>
+                <span className="tag-danger shrink-0">94/100 IN 2HR</span>
               </div>
-              <p className="text-[11px] text-slate-300 leading-relaxed">
-                Hotspot behaviour is <strong className="text-amber-400">3.2× above</strong> learned baseline. Exponential spread projected near volatile fuel buffer.
+              <p className="mt-2 text-xs leading-relaxed text-ink-soft">
+                Hotspot behaviour is <strong className="text-signal">3.2× above</strong> the learned
+                baseline. Exponential spread projected near a volatile fuel buffer.
               </p>
             </div>
-          </div>
+          </Sheet>
 
-          <div className="space-y-2.5">
-            {detections
-              .filter((d) => d.risk_score >= 70 || d.classification === 'INDUSTRIAL_ACCIDENTAL_FIRE')
-              .slice(0, 4)
-              .map((d) => (
-                <div
-                  key={d.id}
-                  onClick={() => onSelectDetection(d)}
-                  className="glass-panel p-3.5 rounded-xl border border-slate-800 hover:border-slate-700 transition cursor-pointer hover:shadow-md relative overflow-hidden group"
+          {/* Priority incidents */}
+          <Sheet className="p-0">
+            <SheetHead
+              title="Priority incidents"
+              icon={<ShieldAlert className="h-4 w-4 text-risk-critical" />}
+              actions={
+                <button
+                  onClick={() => onNavigate('history')}
+                  className="font-mono text-[10px] font-bold uppercase tracking-wider text-blueprint hover:text-signal"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <span className="font-mono text-[10px] text-slate-400 block">{d.id}</span>
-                      <h3 className="text-xs font-bold text-slate-100 group-hover:text-blue-400 transition">
-                        {d.nearest_facility_name || 'Thermal Source'}
-                      </h3>
-                    </div>
-                    <RiskBadge classification={d.classification} riskScore={d.risk_score} showScore />
-                  </div>
+                  View all
+                </button>
+              }
+            />
 
-                  <div className="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
-                    <span>FRP: <strong className="text-amber-400">{d.frp} MW</strong></span>
-                    <span>Temp: <strong className="text-rose-400">{d.brightness} K</strong></span>
-                    <span className="text-blue-400 flex items-center gap-1 font-sans">
-                      Inspect <Eye className="w-3 h-3" />
-                    </span>
-                  </div>
-                </div>
-              ))}
-          </div>
+            {priority.length === 0 ? (
+              <EmptyState
+                icon={<ShieldAlert className="h-5 w-5" />}
+                title="No priority incidents"
+                hint="Nothing above the 70/100 threshold in the current window."
+              />
+            ) : (
+              <ul className="divide-y divide-ink/10">
+                {priority.map((d) => (
+                  <li key={d.id}>
+                    <button
+                      onClick={() => onSelectDetection(d)}
+                      className="group w-full px-4 py-3 text-left transition-colors duration-150 hover:bg-signal-soft"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="min-w-0">
+                          <span className="block font-mono text-[10px] uppercase tracking-wider text-ink-faint">
+                            {d.id}
+                          </span>
+                          <span className="block truncate font-display text-xs font-extrabold uppercase text-ink group-hover:text-signal">
+                            {d.nearest_facility_name || 'Thermal source'}
+                          </span>
+                        </span>
+                        <span className={`${riskTag(d.risk_score)} shrink-0`}>{d.risk_score}/100</span>
+                      </div>
 
-          {/* Rapid Ingest Quick Card */}
-          <div className="glass-panel p-4 rounded-xl border border-blue-900/40 space-y-2.5 bg-gradient-to-br from-blue-950/30 to-slate-900">
-            <h3 className="text-xs font-bold text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
-              <Satellite className="w-3.5 h-3.5" />
-              Automated Satellite Ingestion
+                      <div className="mt-2 flex items-center justify-between border-t border-ink/10 pt-2 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+                        <span>
+                          FRP: <strong className="text-ink">{d.frp} MW</strong>
+                        </span>
+                        <span>
+                          BT: <strong className="text-ink">{d.brightness} K</strong>
+                        </span>
+                        <span className="flex items-center gap-1 text-blueprint">
+                          Inspect <Eye className="h-3 w-3" />
+                        </span>
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Sheet>
+
+          {/* Ingestion callout */}
+          <Sheet className="p-4" framed>
+            <h3 className="key flex items-center gap-1.5">
+              <Satellite className="h-3.5 w-3.5 text-blueprint" />
+              Automated satellite ingestion
             </h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Instantly fetch and classify live thermal anomaly swaths from NASA FIRMS VIIRS/MODIS sensors.
+            <p className="mt-2 text-xs leading-relaxed text-ink-soft">
+              Fetch and classify live thermal anomaly swaths from NASA FIRMS VIIRS/MODIS sensors.
             </p>
-            <button
-              onClick={() => onNavigate('analyze')}
-              className="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md"
-            >
-              <span>Launch Ingestion Pipeline</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+            <button onClick={() => onNavigate('analyze')} className="btn-blueprint mt-3 w-full">
+              Launch ingestion pipeline
+              <ArrowRight className="h-3.5 w-3.5" />
             </button>
-          </div>
+          </Sheet>
         </div>
       </div>
 
-      {/* Recent Activity Table Preview */}
-      <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-bold text-white">Recent Thermal Anomaly Detections</h2>
-            <p className="text-xs text-slate-400">Validated through AI multi-spectral model</p>
-          </div>
-          <button
-            onClick={() => onNavigate('history')}
-            className="text-xs font-semibold text-blue-400 hover:text-blue-300 flex items-center gap-1"
-          >
-            <span>Full History & Search</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
+      {/* Detection schedule */}
+      <Sheet className="overflow-hidden p-0">
+        <SheetHead
+          title="Recent thermal anomaly detections"
+          meta="Validated through AI multi-spectral model"
+          actions={
+            <button
+              onClick={() => onNavigate('history')}
+              className="font-mono text-[10px] font-bold uppercase tracking-wider text-blueprint hover:text-signal"
+            >
+              Full registry →
+            </button>
+          }
+        />
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="text-[11px] uppercase tracking-wider text-slate-400 bg-slate-900/60 border-b border-slate-800 font-mono">
+          <table className="table-shell min-w-[60rem]">
+            <thead>
               <tr>
-                <th className="py-2.5 px-3">ID / Time</th>
-                <th className="py-2.5 px-3">Coordinates</th>
-                <th className="py-2.5 px-3">FRP / Brightness</th>
-                <th className="py-2.5 px-3">Classification</th>
-                <th className="py-2.5 px-3">Nearest Facility</th>
-                <th className="py-2.5 px-3">Risk Score</th>
-                <th className="py-2.5 px-3 text-right">Action</th>
+                <th>ID / Date</th>
+                <th>Coordinates</th>
+                <th>FRP / BT</th>
+                <th>Classification</th>
+                <th>Nearest facility</th>
+                <th>Risk</th>
+                <th className="text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 font-mono">
+            <tbody>
               {detections.slice(0, 6).map((d) => (
-                <tr key={d.id} className="hover:bg-slate-800/40 transition">
-                  <td className="py-3 px-3">
-                    <span className="font-bold text-slate-200">{d.id}</span>
-                    <span className="block text-[10px] text-slate-400">{d.acq_date || '2026-09-07'}</span>
-                  </td>
-                  <td className="py-3 px-3 text-slate-300">
-                    {d.lat.toFixed(4)}, {d.lon.toFixed(4)}
-                  </td>
-                  <td className="py-3 px-3">
-                    <span className="text-amber-400 font-bold">{d.frp} MW</span>
-                    <span className="text-slate-400 block text-[10px]">{d.brightness} K</span>
-                  </td>
-                  <td className="py-3 px-3 font-sans">
-                    <RiskBadge classification={d.classification} />
-                  </td>
-                  <td className="py-3 px-3 font-sans text-slate-300">
-                    {d.nearest_facility_name ? (
-                      <div>
-                        <span className="font-medium text-slate-200">{d.nearest_facility_name}</span>
-                        <span className="block text-[10px] text-slate-400 font-mono">
-                          {d.nearest_facility_dist_km ?? '0.2'} km away
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="text-slate-400">Rural/Remote</span>
-                    )}
-                  </td>
-                  <td className="py-3 px-3">
-                    <span
-                      className={`font-bold px-2 py-0.5 rounded text-[11px] ${
-                        d.risk_score >= 80
-                          ? 'bg-red-500/20 text-red-400'
-                          : d.risk_score >= 60
-                          ? 'bg-orange-500/20 text-orange-400'
-                          : 'bg-emerald-500/20 text-emerald-400'
-                      }`}
-                    >
-                      {d.risk_score}/100
+                <tr key={d.id}>
+                  <td>
+                    <span className="block font-mono text-[11px] font-bold text-ink">{d.id}</span>
+                    <span className="block font-mono text-[10px] text-ink-muted">
+                      {d.acq_date || '—'}
                     </span>
                   </td>
-                  <td className="py-3 px-3 text-right">
-                    <button
-                      onClick={() => onSelectDetection(d)}
-                      className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-blue-600 hover:text-white text-slate-300 font-sans text-xs transition"
-                    >
+                  <td className="font-mono text-[11px] text-ink-soft">
+                    {d.lat.toFixed(4)}, {d.lon.toFixed(4)}
+                  </td>
+                  <td className="font-mono text-[11px]">
+                    <span className="font-bold text-ink">{d.frp} MW</span>
+                    <span className="block text-ink-muted">{d.brightness} K</span>
+                  </td>
+                  <td>
+                    <RiskBadge classification={d.classification} />
+                  </td>
+                  <td className="text-xs text-ink-soft">
+                    {d.nearest_facility_name ? (
+                      <>
+                        <span className="block font-semibold text-ink">{d.nearest_facility_name}</span>
+                        <span className="block font-mono text-[10px] text-ink-muted">
+                          {d.nearest_facility_dist_km ?? '—'} km away
+                        </span>
+                      </>
+                    ) : (
+                      <span className="font-mono text-[10px] uppercase text-ink-faint">Rural / remote</span>
+                    )}
+                  </td>
+                  <td>
+                    <span className={riskTag(d.risk_score)}>{d.risk_score}/100</span>
+                  </td>
+                  <td className="text-right">
+                    <button onClick={() => onSelectDetection(d)} className="btn-secondary btn-sm">
                       Report
                     </button>
                   </td>
                 </tr>
               ))}
+              {detections.length === 0 && (
+                <tr>
+                  <td colSpan={7}>
+                    <EmptyState
+                      icon={<Satellite className="h-5 w-5" />}
+                      title="No detections on record"
+                      hint="Ingest a NASA FIRMS swath or submit a single observation to begin."
+                      action={
+                        <button onClick={() => onNavigate('analyze')} className="btn-primary mt-1">
+                          Run thermal analysis
+                        </button>
+                      }
+                    />
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
-      </div>
+      </Sheet>
+
+      <TitleBlock sheetNo="01" view="Thermal intelligence overview" />
     </div>
   );
 };
-

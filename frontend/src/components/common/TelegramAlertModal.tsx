@@ -235,37 +235,37 @@ export const TelegramAlertModal: React.FC<TelegramAlertModalProps> = ({ isOpen, 
   return createPortal(
     <div
       onClick={onClose}
-      className="fixed inset-0 z-[999999] overflow-y-auto bg-black/80 backdrop-blur-md p-4 sm:p-6 flex items-center justify-center min-h-screen"
+      className="fixed inset-0 z-[999999] flex min-h-screen items-center justify-center overflow-y-auto bg-ink/70 p-4 backdrop-blur-sm sm:p-6"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-xl my-auto bg-[#0a0f1d] border border-cyan-500/40 rounded-3xl shadow-[0_0_60px_rgba(6,182,212,0.25)] p-5 sm:p-6 space-y-4 text-slate-200 z-[1000000]"
+        className="sheet sheet-framed shadow-hard relative z-[1000000] my-auto w-full max-w-xl space-y-4 p-5 text-ink sm:p-6"
       >
         
         {/* Top Header */}
-        <div className="flex items-start justify-between border-b border-slate-800/80 pb-3.5">
+        <div className="flex items-start justify-between gap-3 border-b-2 border-ink pb-3.5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/30 border border-cyan-400/40 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center border-2 border-ink bg-blueprint text-ink">
               <Send className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base sm:text-lg font-extrabold text-white tracking-tight">
+                <h2 className="font-display text-base font-extrabold uppercase tracking-tight text-ink sm:text-lg">
                   Telegram Emergency Alert Console
                 </h2>
-                <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="tag-ok">
+                  <span className="h-1.5 w-1.5 animate-blink bg-risk-low" />
                   LIVE BOT
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Select any location to dispatch an instant GPS alert to <strong className="text-cyan-300">@pyroguard_alerts_soham_bot</strong>
+              <p className="mt-1 text-[11px] leading-relaxed text-ink-soft">
+                Select any location to dispatch an instant GPS alert to <strong className="text-blueprint">@pyroguard_alerts_soham_bot</strong>
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className="btn-icon h-8 w-8 shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
@@ -273,8 +273,8 @@ export const TelegramAlertModal: React.FC<TelegramAlertModalProps> = ({ isOpen, 
 
         {/* Quick Location Pills */}
         <div className="space-y-2">
-          <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-            <MapPin className="w-3.5 h-3.5 text-cyan-400" />
+          <label className="label flex items-center gap-1.5">
+            <MapPin className="w-3.5 h-3.5 text-blueprint" />
             <span>Select Target Location / Facility</span>
           </label>
           <div className="flex flex-wrap gap-1.5">
@@ -285,10 +285,10 @@ export const TelegramAlertModal: React.FC<TelegramAlertModalProps> = ({ isOpen, 
                   setIsCustomPlace(false);
                   setSelectedPlaceId(p.id);
                 }}
-                className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold transition border ${
+                className={`border-2 px-2.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition-all duration-150 ${
                   !isCustomPlace && selectedPlaceId === p.id
-                    ? 'bg-cyan-500/20 border-cyan-400 text-cyan-200 shadow-sm shadow-cyan-500/30'
-                    : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                    ? 'border-ink bg-ink text-paper-raised'
+                    : 'border-ink bg-paper-raised text-ink hover:bg-signal-soft'
                 }`}
               >
                 {p.name.split(' ')[0]} {p.name.split(' ')[1] || ''}
@@ -296,10 +296,10 @@ export const TelegramAlertModal: React.FC<TelegramAlertModalProps> = ({ isOpen, 
             ))}
             <button
               onClick={() => setIsCustomPlace(true)}
-              className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold transition border ${
+              className={`border-2 px-2.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition-all duration-150 ${
                 isCustomPlace
-                  ? 'bg-indigo-500/20 border-indigo-400 text-indigo-200 shadow-sm'
-                  : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                  ? 'border-ink bg-blueprint text-white'
+                  : 'border-ink bg-paper-raised text-ink hover:bg-signal-soft'
               }`}
             >
               📍 Custom GPS
@@ -314,7 +314,7 @@ export const TelegramAlertModal: React.FC<TelegramAlertModalProps> = ({ isOpen, 
               <select
                 value={selectedPlaceId}
                 onChange={(e) => setSelectedPlaceId(e.target.value)}
-                className="w-full appearance-none px-4 py-3 rounded-2xl bg-slate-900/90 border border-slate-700 text-white text-xs sm:text-sm font-medium focus:outline-none focus:border-cyan-500 transition cursor-pointer pr-10"
+                className="input cursor-pointer appearance-none pr-10 text-xs sm:text-sm"
               >
                 <optgroup label="🏭 Major Refineries & Petrochemical Hubs">
                   {PRESET_PLACES.filter((p) => p.type === 'petroleum_refinery' || p.type === 'offshore_flaring_platform').map((p) => (
@@ -338,47 +338,47 @@ export const TelegramAlertModal: React.FC<TelegramAlertModalProps> = ({ isOpen, 
                   ))}
                 </optgroup>
               </select>
-              <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
             </div>
           </div>
         ) : (
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 space-y-3">
+          <div className="space-y-3 border-2 border-ink bg-paper p-3.5">
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 mb-1">Custom Location / Facility Name</label>
+              <label className="label">Custom Location / Facility Name</label>
               <input
                 type="text"
                 value={customName}
                 onChange={(e) => setCustomName(e.target.value)}
                 placeholder="e.g. Gujarat Industrial Estate Pin 4"
-                className="w-full px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-medium focus:outline-none focus:border-cyan-500"
+                className="input"
               />
             </div>
             <div className="grid grid-cols-3 gap-2 font-mono text-xs">
               <div>
-                <label className="block text-[10px] font-semibold text-slate-400 mb-1">Latitude</label>
+                <label className="label">Latitude</label>
                 <input
                   type="text"
                   value={customLat}
                   onChange={(e) => setCustomLat(e.target.value)}
-                  className="w-full px-2.5 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-500"
+                  className="input"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-semibold text-slate-400 mb-1">Longitude</label>
+                <label className="label">Longitude</label>
                 <input
                   type="text"
                   value={customLon}
                   onChange={(e) => setCustomLon(e.target.value)}
-                  className="w-full px-2.5 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-500"
+                  className="input"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-semibold text-slate-400 mb-1">FRP (MW)</label>
+                <label className="label">FRP (MW)</label>
                 <input
                   type="text"
                   value={customFrp}
                   onChange={(e) => setCustomFrp(e.target.value)}
-                  className="w-full px-2.5 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-500"
+                  className="input"
                 />
               </div>
             </div>
@@ -386,31 +386,31 @@ export const TelegramAlertModal: React.FC<TelegramAlertModalProps> = ({ isOpen, 
         )}
 
         {/* Selected Place Live Preview Box */}
-        <div className="bg-gradient-to-r from-slate-900/90 to-[#0c1424] border border-cyan-900/50 rounded-2xl p-4 space-y-2.5 text-xs">
+        <div className="space-y-2.5 border-2 border-ink bg-paper p-4 text-xs">
           <div className="flex items-center justify-between">
-            <span className="font-bold text-white flex items-center gap-2">
-              <Factory className="w-4 h-4 text-cyan-400" />
+            <span className="font-bold text-ink flex items-center gap-2">
+              <Factory className="w-4 h-4 text-blueprint" />
               <span>{isCustomPlace ? customName : currentPlace.name}</span>
             </span>
-            <span className="font-mono text-[11px] text-cyan-300 font-bold bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/50">
+            <span className="tag-blueprint">
               {isCustomPlace ? `${customLat}° N, ${customLon}° E` : `${currentPlace.lat}° N, ${currentPlace.lon}° E`}
             </span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 font-mono text-[11px]">
-            <div className="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
-              <span className="text-[10px] text-slate-400 font-sans block">Simulated FRP</span>
-              <span className="font-bold text-amber-400">{getSimulatedFrp()} MW</span>
+            <div className="border-2 border-ink bg-paper-raised p-2">
+              <span className="block font-mono text-[9px] uppercase tracking-wider text-ink-muted">Simulated FRP</span>
+              <span className="font-bold text-risk-moderate">{getSimulatedFrp()} MW</span>
             </div>
-            <div className="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
-              <span className="text-[10px] text-slate-400 font-sans block">Baseline Heat</span>
-              <span className="font-bold text-slate-300">
+            <div className="border-2 border-ink bg-paper-raised p-2">
+              <span className="block font-mono text-[9px] uppercase tracking-wider text-ink-muted">Baseline Heat</span>
+              <span className="font-bold text-ink-soft">
                 {isCustomPlace ? 'Dynamic' : `${currentPlace.baselineFrp} MW (Normal)`}
               </span>
             </div>
-            <div className="bg-slate-950/60 p-2 rounded-xl border border-slate-800 col-span-2 sm:col-span-1">
-              <span className="text-[10px] text-slate-400 font-sans block">Surge Ratio</span>
-              <span className="font-bold text-rose-400">
+            <div className="col-span-2 border-2 border-ink bg-paper-raised p-2 sm:col-span-1">
+              <span className="block font-mono text-[9px] uppercase tracking-wider text-ink-muted">Surge Ratio</span>
+              <span className="font-bold text-signal">
                 {isCustomPlace
                   ? '3.5× Spike'
                   : currentPlace.baselineFrp > 0
@@ -422,21 +422,21 @@ export const TelegramAlertModal: React.FC<TelegramAlertModalProps> = ({ isOpen, 
 
           {/* Severity Mode Selector */}
           <div className="pt-1 flex items-center justify-between text-[11px]">
-            <span className="text-slate-400">Alert Threat Level:</span>
+            <span className="text-ink-muted">Alert Threat Level:</span>
             <div className="flex gap-1">
               {(['ELEVATED', 'CRITICAL', 'EXTREME'] as const).map((mode) => (
                 <button
                   key={mode}
                   type="button"
                   onClick={() => setSeverityMode(mode)}
-                  className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase transition border ${
+                  className={`border-2 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider transition-all duration-150 ${
                     severityMode === mode
                       ? mode === 'EXTREME'
-                        ? 'bg-purple-900/60 border-purple-500 text-purple-200'
+                        ? 'border-risk-critical bg-risk-critical text-white'
                         : mode === 'CRITICAL'
-                        ? 'bg-rose-900/60 border-rose-500 text-rose-200'
-                        : 'bg-amber-900/60 border-amber-500 text-amber-200'
-                      : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                        ? 'border-signal bg-signal text-white'
+                        : 'border-risk-moderate bg-risk-moderate text-white'
+                      : 'border-ink bg-paper-raised text-ink hover:bg-signal-soft'
                   }`}
                 >
                   {mode}
@@ -449,21 +449,21 @@ export const TelegramAlertModal: React.FC<TelegramAlertModalProps> = ({ isOpen, 
         {/* Feedback Alert Toast */}
         {dispatchResult && (
           <div
-            className={`p-3.5 rounded-2xl text-xs flex items-center justify-between gap-2 shadow-lg animate-fadeIn ${
+            className={`flex animate-draw-in items-center justify-between gap-2 border-2 p-3.5 text-xs ${
               dispatchResult.success
-                ? 'bg-emerald-950/80 border border-emerald-600/70 text-emerald-200'
-                : 'bg-rose-950/80 border border-rose-600/70 text-rose-200'
+                ? 'border-risk-low bg-[#EAF5EF] text-risk-low'
+                : 'border-risk-critical bg-[#FDECE8] text-risk-critical'
             }`}
           >
             <div className="flex items-center gap-2 font-medium">
               {dispatchResult.success ? (
-                <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                <CheckCircle className="w-4 h-4 text-risk-low shrink-0" />
               ) : (
-                <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                <AlertTriangle className="w-4 h-4 text-signal shrink-0" />
               )}
               <span>{dispatchResult.message}</span>
             </div>
-            <button onClick={() => setDispatchResult(null)} className="text-slate-400 hover:text-white p-0.5">
+            <button onClick={() => setDispatchResult(null)} className="text-ink-muted hover:text-signal">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -474,7 +474,7 @@ export const TelegramAlertModal: React.FC<TelegramAlertModalProps> = ({ isOpen, 
           <button
             onClick={handleSendPlaceAlert}
             disabled={dispatching}
-            className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-cyan-500 via-sky-600 to-blue-600 hover:from-cyan-400 hover:via-sky-500 hover:to-blue-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 disabled:opacity-50 group"
+            className="btn-primary group w-full py-3.5 text-xs sm:text-sm"
           >
             <Send className={`w-4 h-4 group-hover:scale-110 transition-transform ${dispatching ? 'animate-spin' : ''}`} />
             <span>
@@ -489,7 +489,7 @@ export const TelegramAlertModal: React.FC<TelegramAlertModalProps> = ({ isOpen, 
             <button
               onClick={handleSendTestPing}
               disabled={pingLoading}
-              className="text-slate-400 hover:text-cyan-300 font-semibold flex items-center gap-1.5 transition disabled:opacity-50"
+              className="text-ink-muted hover:text-blueprint font-semibold flex items-center gap-1.5 transition disabled:opacity-50"
             >
               <Radio className={`w-3.5 h-3.5 ${pingLoading ? 'animate-spin' : ''}`} />
               <span>{pingLoading ? 'Pinging Bot...' : '⚡ Send Diagnostic Test Ping'}</span>
@@ -499,7 +499,7 @@ export const TelegramAlertModal: React.FC<TelegramAlertModalProps> = ({ isOpen, 
               href="https://t.me/pyroguard_alerts_soham_bot"
               target="_blank"
               rel="noreferrer"
-              className="text-sky-400 hover:text-sky-300 font-semibold flex items-center gap-1 transition"
+              className="flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-wider text-blueprint transition-colors duration-150 hover:text-signal"
             >
               <span>Open @pyroguard_alerts_soham_bot</span>
               <ExternalLink className="w-3 h-3" />

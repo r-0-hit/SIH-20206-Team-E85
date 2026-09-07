@@ -14,195 +14,220 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { BarChart3, TrendingUp, ShieldAlert, Layers } from 'lucide-react';
+import { TrendingUp, ShieldAlert, Layers } from 'lucide-react';
 import { AnalyticsSummary } from '../types/index';
+import { PageHeader } from '../components/ui/PageHeader';
+import { Sheet, SheetHead } from '../components/ui/Sheet';
+import { TitleBlock } from '../components/ui/TitleBlock';
+import { Skeleton } from '../components/ui/Skeleton';
 
 interface AnalyticsPageProps {
   analytics: AnalyticsSummary | null;
 }
 
+/* Blueprint chart palette — flat printed inks, no gradients on the marks */
+const INK = '#0A0A0A';
+const GRID = 'rgba(10,10,10,0.12)';
+const SERIES = ['#1438AA', '#F74B00', '#4A576A', '#B47A00', '#1B7A4B', '#0A0A0A'];
+/* Hazard tiers keep their semantic colours: critical → elevated → moderate → low */
+const TIER_COLORS = ['#D42200', '#F74B00', '#B47A00', '#1B7A4B'];
+
+const axisProps = {
+  stroke: INK,
+  tick: { fontSize: 10, fontFamily: 'Roboto Mono, monospace', fill: '#6E6E6E' },
+  tickLine: { stroke: INK },
+};
+
+const tooltipStyle = {
+  backgroundColor: '#FFFFFF',
+  border: '2px solid #0A0A0A',
+  borderRadius: 0,
+  boxShadow: '4px 4px 0 0 #0A0A0A',
+  fontSize: '11px',
+  fontFamily: 'Roboto Mono, monospace',
+  textTransform: 'uppercase' as const,
+};
+
 export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ analytics }) => {
   if (!analytics) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-12 text-center text-slate-400">
-        Loading analytics intelligence...
+      <div className="page-shell space-y-6">
+        <PageHeader sheet="DWG 06" title="Thermal Analytics & Predictive Intelligence" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-28" />
+          ))}
+        </div>
+        <Skeleton className="h-80" />
       </div>
     );
   }
 
-  const {
-    summary,
-    classificationDistribution,
-    riskDistribution,
-    temporalTrends,
-  } = analytics;
+  const { summary, classificationDistribution, riskDistribution, temporalTrends } = analytics;
 
-  const COLORS = ['#ef4444', '#a855f7', '#f97316', '#eab308', '#64748b', '#10b981'];
+  const industrialRatio =
+    summary.totalAnalyses > 0
+      ? Math.round((summary.industrialCount / summary.totalAnalyses) * 100)
+      : 0;
 
-  // Calculate high-level insights
-  const industrialRatio = summary.totalAnalyses > 0
-    ? Math.round((summary.industrialCount / summary.totalAnalyses) * 100)
-    : 0;
+  const highlights = [
+    {
+      label: 'Industrial footprint ratio',
+      value: `${industrialRatio}%`,
+      note: 'Of all thermal anomalies occurring within industrial buffer zones.',
+      rule: 'bg-blueprint',
+    },
+    {
+      label: 'Active emergency incidents',
+      value: summary.activeCriticalAlerts,
+      note: 'Confirmed high-risk industrial accidents awaiting SOP dispatch.',
+      rule: 'bg-risk-critical',
+    },
+    {
+      label: 'Average system risk',
+      value: `${summary.avgRiskScore}/100`,
+      note: 'Platform-wide composite severity across all detected anomalies.',
+      rule: 'bg-ink',
+    },
+  ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-6">
-      {/* Page Title */}
-      <div className="border-b border-slate-800 pb-4">
-        <h1 className="text-2xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-          <BarChart3 className="w-6 h-6 text-blue-400" />
-          <span>Thermal Analytics & Predictive Intelligence</span>
-        </h1>
-        <p className="text-xs text-slate-400 mt-0.5">
-          Spatio-temporal distributions, threat categorizations, and radiometric trend telemetry.
-        </p>
+    <div className="page-shell space-y-6">
+      <PageHeader
+        sheet="DWG 06"
+        title="Thermal Analytics & Predictive Intelligence"
+        description="Spatio-temporal distributions, threat categorisation and radiometric trend telemetry."
+      />
+
+      {/* Highlights schedule */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {highlights.map((h) => (
+          <Sheet key={h.label} className="relative overflow-hidden p-4">
+            <div className={`absolute inset-x-0 top-0 h-1 ${h.rule}`} />
+            <span className="mt-1 block font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted">
+              {h.label}
+            </span>
+            <div className="kpi mt-2">{h.value}</div>
+            <p className="mt-2 text-[11px] leading-relaxed text-ink-soft">{h.note}</p>
+          </Sheet>
+        ))}
       </div>
 
-      {/* Highlights Strip */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="glass-panel p-4 rounded-xl border border-slate-800 space-y-1">
-          <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">
-            Industrial Footprint Ratio
-          </span>
-          <div className="text-2xl font-extrabold text-blue-400 font-mono">
-            {industrialRatio}%
-          </div>
-          <p className="text-[11px] text-slate-400">
-            Of all thermal anomalies occur at or within industrial buffer zones.
-          </p>
-        </div>
-
-        <div className="glass-panel p-4 rounded-xl border border-slate-800 space-y-1">
-          <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">
-            Active Emergency Incidents
-          </span>
-          <div className="text-2xl font-extrabold text-rose-500 font-mono">
-            {summary.activeCriticalAlerts}
-          </div>
-          <p className="text-[11px] text-slate-400">
-            Confirmed high-risk industrial accidents requiring immediate SOP dispatch.
-          </p>
-        </div>
-
-        <div className="glass-panel p-4 rounded-xl border border-slate-800 space-y-1">
-          <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">
-            Average System Risk
-          </span>
-          <div className="text-2xl font-extrabold text-amber-400 font-mono">
-            {summary.avgRiskScore}/100
-          </div>
-          <p className="text-[11px] text-slate-400">
-            Platform-wide composite severity average across all detected anomalies.
-          </p>
-        </div>
-      </div>
-
-      {/* Main Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Temporal Detection Trend Area Chart */}
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
-            <h2 className="text-sm font-bold text-white flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-emerald-400" />
-              <span>Temporal Detection Trend (Satellite Influx)</span>
-            </h2>
-            <span className="text-[10px] font-mono text-slate-400">NASA VIIRS / MODIS</span>
-          </div>
-
-          <div className="h-64 w-full">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+        {/* Temporal trend */}
+        <Sheet className="p-0">
+          <SheetHead
+            title="Temporal detection trend"
+            icon={<TrendingUp className="h-4 w-4 text-blueprint" />}
+            meta="NASA VIIRS / MODIS"
+          />
+          <div className="h-64 w-full p-4">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={temporalTrends}>
+              <AreaChart data={temporalTrends} margin={{ top: 4, right: 8, left: -18, bottom: 0 }}>
                 <defs>
                   <linearGradient id="totalColor" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                    <stop offset="0%" stopColor="#1438AA" stopOpacity={0.28} />
+                    <stop offset="100%" stopColor="#1438AA" stopOpacity={0.02} />
                   </linearGradient>
                   <linearGradient id="industrialColor" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                    <stop offset="0%" stopColor="#F74B00" stopOpacity={0.28} />
+                    <stop offset="100%" stopColor="#F74B00" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1f293d" />
-                <XAxis dataKey="date" stroke="#64748b" textAnchor="end" tick={{ fontSize: 10 }} />
-                <YAxis stroke="#64748b" tick={{ fontSize: 10 }} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#111827', borderColor: '#374151', borderRadius: '8px', fontSize: '11px' }}
+                <CartesianGrid stroke={GRID} strokeDasharray="0" />
+                <XAxis dataKey="date" {...axisProps} />
+                <YAxis {...axisProps} />
+                <Tooltip contentStyle={tooltipStyle} cursor={{ stroke: INK, strokeWidth: 1 }} />
+                <Area
+                  type="monotone"
+                  dataKey="count"
+                  name="Total anomalies"
+                  stroke="#1438AA"
+                  strokeWidth={2}
+                  fill="url(#totalColor)"
                 />
-                <Area type="monotone" dataKey="count" name="Total Anomalies" stroke="#3b82f6" fillOpacity={1} fill="url(#totalColor)" />
-                <Area type="monotone" dataKey="industrial_count" name="Industrial Sources" stroke="#ef4444" fillOpacity={1} fill="url(#industrialColor)" />
+                <Area
+                  type="monotone"
+                  dataKey="industrial_count"
+                  name="Industrial sources"
+                  stroke="#F74B00"
+                  strokeWidth={2}
+                  fill="url(#industrialColor)"
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </Sheet>
 
-        {/* Classification Breakdown Donut Chart */}
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
-            <h2 className="text-sm font-bold text-white flex items-center gap-2">
-              <Layers className="w-4 h-4 text-purple-400" />
-              <span>Thermal Anomaly Classification Distribution</span>
-            </h2>
-            <span className="text-[10px] font-mono text-slate-400">Random Forest Ensemble</span>
-          </div>
-
-          <div className="h-64 w-full flex items-center justify-center">
+        {/* Classification split */}
+        <Sheet className="p-0">
+          <SheetHead
+            title="Classification distribution"
+            icon={<Layers className="h-4 w-4 text-steel" />}
+            meta="Random forest ensemble"
+          />
+          <div className="h-64 w-full p-4">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={classificationDistribution.filter((c) => c.count > 0)}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={85}
-                  paddingAngle={4}
+                  innerRadius={55}
+                  outerRadius={82}
+                  paddingAngle={2}
                   dataKey="count"
+                  stroke={INK}
+                  strokeWidth={2}
                 >
-                  {classificationDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
-                  ))}
+                  {classificationDistribution
+                    .filter((c) => c.count > 0)
+                    .map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={SERIES[index % SERIES.length]} />
+                    ))}
                 </Pie>
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#111827', borderColor: '#374151', borderRadius: '8px', fontSize: '11px' }}
-                />
+                <Tooltip contentStyle={tooltipStyle} />
                 <Legend
                   verticalAlign="bottom"
                   align="center"
-                  wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
+                  wrapperStyle={{
+                    fontSize: '10px',
+                    fontFamily: 'Roboto Mono, monospace',
+                    textTransform: 'uppercase',
+                    paddingTop: '8px',
+                  }}
                 />
               </PieChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </Sheet>
 
-        {/* Risk Distribution Bar Chart */}
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3 lg:col-span-2">
-          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
-            <h2 className="text-sm font-bold text-white flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 text-amber-400" />
-              <span>Hazard Severity Tier Distribution</span>
-            </h2>
-            <span className="text-[10px] font-mono text-slate-400">0 - 100 Multi-Factor Risk Score</span>
-          </div>
-
-          <div className="h-60 w-full">
+        {/* Hazard tiers */}
+        <Sheet className="p-0 lg:col-span-2">
+          <SheetHead
+            title="Hazard severity tier distribution"
+            icon={<ShieldAlert className="h-4 w-4 text-signal" />}
+            meta="0–100 multi-factor risk score"
+          />
+          <div className="h-60 w-full p-4">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={riskDistribution}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1f293d" />
-                <XAxis dataKey="tier" stroke="#64748b" tick={{ fontSize: 11 }} />
-                <YAxis stroke="#64748b" tick={{ fontSize: 10 }} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#111827', borderColor: '#374151', borderRadius: '8px', fontSize: '11px' }}
-                />
-                <Bar dataKey="count" name="Detections in Tier" radius={[6, 6, 0, 0]}>
-                  {riskDistribution.map((entry, index) => (
-                    <Cell key={`bar-${index}`} fill={entry.color} />
+              <BarChart data={riskDistribution} margin={{ top: 4, right: 8, left: -18, bottom: 0 }}>
+                <CartesianGrid stroke={GRID} strokeDasharray="0" vertical={false} />
+                <XAxis dataKey="tier" {...axisProps} />
+                <YAxis {...axisProps} />
+                <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'rgba(247,75,0,0.08)' }} />
+                <Bar dataKey="count" name="Detections in tier" stroke={INK} strokeWidth={2}>
+                  {riskDistribution.map((_, index) => (
+                    <Cell key={`bar-${index}`} fill={TIER_COLORS[index % TIER_COLORS.length]} />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </Sheet>
       </div>
+
+      <TitleBlock sheetNo="06" view="Analytics & trends" />
     </div>
   );
 };
-

@@ -27,6 +27,8 @@ import { ThermalBaselineChart } from '../components/twin/ThermalBaselineChart';
 import { RiskTimelineCard } from '../components/twin/RiskTimelineCard';
 import { ShapExplanation } from '../components/common/ShapExplanation';
 import { WhatIfSimulator } from '../components/twin/WhatIfSimulator';
+import { Sheet, SheetHead } from '../components/ui/Sheet';
+import { TitleBlock } from '../components/ui/TitleBlock';
 
 interface ResultDetailPageProps {
   detection: Detection;
@@ -46,10 +48,6 @@ export const ResultDetailPage: React.FC<ResultDetailPageProps> = ({
   const [dispatchingAlert, setDispatchingAlert] = useState<boolean>(false);
   const [alertFeedback, setAlertFeedback] = useState<string | null>(null);
 
-  const toggleSop = (index: number) => {
-    setCompletedSop((prev) => ({ ...prev, [index]: !prev[index] }));
-  };
-
   const handleDispatchTelegramAlert = async () => {
     setDispatchingAlert(true);
     setAlertFeedback(null);
@@ -63,6 +61,10 @@ export const ResultDetailPage: React.FC<ResultDetailPageProps> = ({
     } finally {
       setDispatchingAlert(false);
     }
+  };
+
+  const toggleSop = (index: number) => {
+    setCompletedSop((prev) => ({ ...prev, [index]: !prev[index] }));
   };
 
   const handleStatusChange = async (newStatus: string) => {
@@ -84,93 +86,86 @@ export const ResultDetailPage: React.FC<ResultDetailPageProps> = ({
   const twin = detection.thermal_twin;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-6">
-      {/* Top Header & Navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onBack}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
-          >
-            <ArrowLeft className="w-5 h-5" />
+    <div className="page-shell space-y-5">
+      {/* Report header */}
+      <div className="rule-underline flex flex-col justify-between gap-4 pb-3 lg:flex-row lg:items-end">
+        <div className="flex items-start gap-3">
+          <button onClick={onBack} className="btn-icon mt-1 shrink-0">
+            <ArrowLeft className="h-4 w-4" />
           </button>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl lg:text-2xl font-extrabold text-white font-mono">
-                {detection.id}
-              </h1>
-              <RiskBadge classification={detection.classification} riskScore={detection.risk_score} showScore />
+          <div className="min-w-0">
+            <div className="mb-1.5 flex flex-wrap items-center gap-2">
+              <span className="tag-solid">INCIDENT REPORT</span>
+              <RiskBadge
+                classification={detection.classification}
+                riskScore={detection.risk_score}
+                showScore
+              />
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Acquisition: {detection.acq_date || '2026-09-07'} at {detection.acq_time || '2145'} UTC | {detection.satellite} ({detection.daynight === 'N' ? 'Night Swath' : 'Daytime Swath'})
+            <h1 className="font-display text-2xl font-extrabold uppercase tracking-tight text-ink">
+              {detection.id}
+            </h1>
+            <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.1em] text-ink-muted">
+              ACQ: {detection.acq_date || '—'} @ {detection.acq_time || '—'} UTC · {detection.satellite} ·{' '}
+              {detection.daynight === 'N' ? 'NIGHT SWATH' : 'DAYTIME SWATH'}
             </p>
           </div>
         </div>
 
         {/* Status Dropdown, Simulator Toggle & Print */}
-        <div className="flex items-center gap-3">
-          {statusMsg && (
-            <span className="text-xs text-emerald-400 font-semibold animate-pulse">
-              {statusMsg}
-            </span>
-          )}
+        <div className="flex flex-wrap items-center gap-2">
+          {statusMsg && <span className="tag-ok">{statusMsg}</span>}
 
           <button
             onClick={() => setShowSimulator(!showSimulator)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition border ${
-              showSimulator
-                ? 'bg-indigo-600 border-indigo-500 text-white'
-                : 'bg-slate-800 border-slate-700 text-indigo-300 hover:bg-slate-700'
-            }`}
+            className={showSimulator ? 'btn-blueprint' : 'btn-secondary'}
           >
-            <Sliders className="w-3.5 h-3.5" />
-            <span>{showSimulator ? 'Close What-If' : 'What-If Simulator'}</span>
+            <Sliders className="h-3.5 w-3.5" />
+            {showSimulator ? 'Close what-if' : 'What-if simulator'}
           </button>
 
-          <div className="flex items-center gap-2 bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs">
-            <span className="text-slate-400">Incident Status:</span>
+          <label className="flex items-center gap-2 border-2 border-ink bg-paper-raised px-3 py-1.5">
+            <span className="key">Status</span>
             <select
               value={status}
               onChange={(e) => handleStatusChange(e.target.value)}
-              className="bg-transparent text-white font-bold focus:outline-none cursor-pointer"
+              className="cursor-pointer bg-transparent font-mono text-[11px] font-bold uppercase text-ink focus:outline-none"
             >
-              <option value="ACTIVE" className="bg-slate-900 text-white">ACTIVE</option>
-              <option value="VERIFIED" className="bg-slate-900 text-white">VERIFIED</option>
-              <option value="RESOLVED" className="bg-slate-900 text-white">RESOLVED</option>
-              <option value="FALSE_ALARM" className="bg-slate-900 text-white">FALSE_ALARM</option>
+              <option value="ACTIVE">ACTIVE</option>
+              <option value="VERIFIED">VERIFIED</option>
+              <option value="RESOLVED">RESOLVED</option>
+              <option value="FALSE_ALARM">FALSE_ALARM</option>
             </select>
-          </div>
+          </label>
 
-          {/* STANDOUT: Manual Telegram Alert Button */}
           <button
             onClick={handleDispatchTelegramAlert}
             disabled={dispatchingAlert}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white text-xs font-bold transition shadow-md shadow-sky-500/20 disabled:opacity-50"
-            title="Immediately send Telegram emergency alert for this specific incident location"
+            className="btn-blueprint no-print"
+            title="Immediately send a Telegram emergency alert for this incident location"
           >
-            <Send className={`w-3.5 h-3.5 ${dispatchingAlert ? 'animate-spin' : ''}`} />
-            <span>{dispatchingAlert ? 'Sending Alert...' : '📢 Send Telegram Alert'}</span>
+            <Send className={`h-3.5 w-3.5 ${dispatchingAlert ? 'animate-spin' : ''}`} />
+            {dispatchingAlert ? 'Sending…' : 'Send alert'}
           </button>
 
-          <button
-            onClick={() => window.print()}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition border border-slate-700"
-          >
-            <Printer className="w-4 h-4" />
-            <span>Print Report</span>
+          <button onClick={() => window.print()} className="btn-secondary no-print">
+            <Printer className="h-3.5 w-3.5" />
+            Print
           </button>
         </div>
       </div>
 
-      {/* Manual Alert Feedback Toast */}
+      {/* Alert dispatch feedback */}
       {alertFeedback && (
-        <div className="p-3 rounded-xl bg-sky-950/80 border border-sky-600/80 text-sky-200 text-xs flex items-center justify-between shadow-lg shadow-sky-950/50 animate-fadeIn">
-          <div className="flex items-center gap-2.5 font-medium">
-            <Send className="w-4 h-4 text-sky-400 shrink-0" />
-            <span>{alertFeedback}</span>
-          </div>
-          <button onClick={() => setAlertFeedback(null)} className="text-slate-400 hover:text-white p-1">
-            <X className="w-4 h-4" />
+        <div className="sheet shadow-hard-sm flex animate-draw-in items-center justify-between gap-3 px-4 py-3">
+          <span className="flex items-center gap-2.5">
+            <Send className="h-4 w-4 shrink-0 text-blueprint" />
+            <span className="font-mono text-[11px] uppercase tracking-wider text-ink">
+              {alertFeedback}
+            </span>
+          </span>
+          <button onClick={() => setAlertFeedback(null)} className="text-ink-muted hover:text-signal">
+            <X className="h-4 w-4" />
           </button>
         </div>
       )}
@@ -178,85 +173,84 @@ export const ResultDetailPage: React.FC<ResultDetailPageProps> = ({
       {/* Top Threat Gauge & Key Telemetry Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Risk Gauge */}
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800 flex flex-col items-center justify-center">
+        <Sheet className="flex flex-col items-center justify-center p-5" framed>
           <RiskMeter score={detection.risk_score} size="lg" />
-          <p className="text-[11px] text-slate-400 mt-3 font-mono">Composite AI Hazard Index</p>
-        </div>
+          <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.12em] text-ink-muted">
+            Composite hazard index
+          </p>
+        </Sheet>
 
         {/* Radiometric Stats */}
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
-            Radiometric Energy
-          </span>
+        <Sheet className="space-y-3 p-5">
+          <span className="key block">Radiometric energy</span>
           <div>
-            <div className="text-2xl font-extrabold text-amber-400 font-mono">
-              {detection.frp} MW
-            </div>
-            <p className="text-xs text-slate-400">Fire Radiative Power</p>
+            <div className="kpi">{detection.frp} MW</div>
+            <p className="val mt-1">Fire radiative power</p>
           </div>
-          <div className="pt-2 border-t border-slate-800/80">
-            <div className="text-lg font-bold text-rose-400 font-mono">
-              {detection.brightness} K
-            </div>
-            <p className="text-[11px] text-slate-400">Brightness Temperature</p>
+          <div className="border-t border-ink/15 pt-2">
+            <div className="font-display text-lg font-extrabold text-ink">{detection.brightness} K</div>
+            <p className="val mt-0.5">Brightness temperature</p>
           </div>
-        </div>
+        </Sheet>
 
         {/* Spatial Proximity Card */}
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
-            Infrastructure Proximity
-          </span>
+        <Sheet className="space-y-3 p-5">
+          <span className="key block">Infrastructure proximity</span>
           <div>
-            <div className="text-lg font-bold text-blue-400 truncate">
-              {nearestFac?.name || detection.nearest_facility_name || 'Rural Land'}
+            <div className="truncate font-display text-base font-extrabold uppercase text-blueprint">
+              {nearestFac?.name || detection.nearest_facility_name || 'Rural land'}
             </div>
-            <p className="text-xs text-slate-400">
-              Distance:{' '}
-              <strong className="text-slate-200 font-mono">
-                {nearestFac?.distance_km ?? detection.nearest_facility_dist_km ?? 'N/A'} km
+            <p className="val mt-1">
+              DISTANCE:{' '}
+              <strong className="text-ink">
+                {nearestFac?.distance_km ?? detection.nearest_facility_dist_km ?? 'N/A'} KM
               </strong>
             </p>
           </div>
-          <div className="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 font-mono">
-            {nearestFac?.type ? (
-              <span className="capitalize">Type: {nearestFac.type.replace('_', ' ')}</span>
-            ) : (
-              <span>No industrial plant within 5km</span>
-            )}
+          <div className="border-t border-ink/15 pt-2">
+            <span className="val">
+              {nearestFac?.type
+                ? `TYPE: ${nearestFac.type.replace('_', ' ')}`
+                : 'NO INDUSTRIAL PLANT WITHIN 5 KM'}
+            </span>
           </div>
-        </div>
+        </Sheet>
 
         {/* Spatio-Temporal Persistence & Digital Twin Anomaly */}
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
-            Twin Anomaly Status
-          </span>
+        <Sheet className="space-y-3 p-5">
+          <span className="key block">Twin anomaly status</span>
           <div>
-            <div className="text-2xl font-extrabold text-purple-400 font-mono">
-              {twin ? `${twin.anomaly_ratio.toFixed(1)}× Baseline` : pers?.persistence_score ? `${Math.round(pers.persistence_score * 100)}% Persist` : 'Normal'}
+            <div className="kpi">
+              {twin
+                ? `${twin.anomaly_ratio.toFixed(1)}×`
+                : pers?.persistence_score
+                ? `${Math.round(pers.persistence_score * 100)}%`
+                : 'NORMAL'}
             </div>
-            <p className="text-xs text-slate-400">
-              {twin ? `Severity: ${twin.anomaly_severity}` : 'Stationary Recurrence Index'}
+            <p className="val mt-1">
+              {twin ? `SEVERITY: ${twin.anomaly_severity}` : 'STATIONARY RECURRENCE INDEX'}
             </p>
           </div>
-          <div className="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400">
-            Z-Score: <strong className="text-slate-200 font-mono">{twin?.z_score?.toFixed(1) ?? '0.0'}</strong> | Detections: <strong className="text-slate-200 font-mono">{pers?.historical_detections ?? 1}</strong>
+          <div className="border-t border-ink/15 pt-2">
+            <span className="val">
+              Z-SCORE: <strong className="text-ink">{twin?.z_score?.toFixed(1) ?? '0.0'}</strong> ·
+              DETECTIONS: <strong className="text-ink">{pers?.historical_detections ?? 1}</strong>
+            </span>
           </div>
-        </div>
+        </Sheet>
       </div>
 
       {/* Interactive What-If Simulator Drawer (Expandable) */}
       {showSimulator && (
-        <div className="glass-panel p-6 rounded-2xl border border-indigo-700/50 bg-indigo-950/20 animate-fadeIn">
+        <Sheet className="animate-draw-in p-5" tab>
           <WhatIfSimulator />
-        </div>
+        </Sheet>
       )}
 
       {/* STANDOUT INNOVATION: Digital Thermal Twin & Predictive Risk Trajectory Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left: Facility Digital Thermal Twin Chart */}
-        <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+        <Sheet className="space-y-4 p-5">
           <ThermalBaselineChart
             baseline={null}
             currentFrp={detection.frp}
@@ -264,97 +258,89 @@ export const ResultDetailPage: React.FC<ResultDetailPageProps> = ({
             twinResult={twin || null}
             facilityName={nearestFac?.name || detection.nearest_facility_name || 'Industrial Facility'}
           />
-        </div>
+        </Sheet>
 
         {/* Right: Future Risk Timeline (+30, +60, +120 min) */}
-        <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
-          <RiskTimelineCard
-            timeline={detection.prediction || null}
-            baseRisk={detection.risk_score}
-          />
-        </div>
+        <Sheet className="space-y-4 p-5">
+          <RiskTimelineCard timeline={detection.prediction || null} baseRisk={detection.risk_score} />
+        </Sheet>
       </div>
 
       {/* Two Column Layout: SHAP Explainable Attribution & SOP Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Col: Explainable AI SHAP Attribution & Indicators */}
-        <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-5">
+        <Sheet className="space-y-5 p-5">
           <ShapExplanation
             explanations={detection.shap_explanation}
             riskScore={detection.risk_score}
           />
 
-          <div className="pt-3 border-t border-slate-800/80 space-y-2">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
-              Evidence Log
-            </span>
-            <div className="space-y-2">
+          <div className="space-y-2 border-t-2 border-ink pt-4">
+            <span className="key block">Evidence log</span>
+            <ol className="space-y-2">
               {(detection.indicators || []).map((indicator, idx) => (
-                <div
+                <li
                   key={idx}
-                  className="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 text-xs text-slate-300 flex items-start gap-2.5"
+                  className="flex items-start gap-2.5 border-2 border-ink bg-paper p-2.5 text-[11px] leading-relaxed text-ink-soft"
                 >
-                  <div className="w-4 h-4 rounded-full bg-blue-950 text-blue-400 flex items-center justify-center font-bold text-[9px] shrink-0 mt-0.5 border border-blue-800">
+                  <span className="flex h-4 w-4 shrink-0 items-center justify-center border border-ink bg-blueprint font-mono text-[9px] font-bold text-white">
                     {idx + 1}
-                  </div>
-                  <p className="leading-relaxed">{indicator}</p>
-                </div>
+                  </span>
+                  <p>{indicator}</p>
+                </li>
               ))}
-            </div>
+            </ol>
           </div>
-        </div>
+        </Sheet>
 
         {/* Right Col: Standard Operating Procedure (SOP) Action Checklist */}
-        <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
-          <div className="border-b border-slate-800 pb-3">
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <Flame className="w-5 h-5 text-rose-500" />
-              <span>Recommended Emergency Response SOP</span>
-            </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Standard operating procedures for plant safety managers and disaster responders.
-            </p>
-          </div>
+        <Sheet className="p-0">
+          <SheetHead
+            title="Recommended emergency response SOP"
+            icon={<Flame className="h-4 w-4 text-signal" />}
+            meta={`${Object.values(completedSop).filter(Boolean).length}/${
+              (detection.recommended_action || []).length
+            } done`}
+          />
 
-          <div className="space-y-2.5">
+          <ul className="space-y-2.5 p-5">
             {(detection.recommended_action || []).map((action, idx) => {
               const isDone = completedSop[idx];
               return (
-                <div
-                  key={idx}
-                  onClick={() => toggleSop(idx)}
-                  className={`p-3.5 rounded-xl border text-xs cursor-pointer transition flex items-start gap-3 ${
-                    isDone
-                      ? 'bg-emerald-950/40 border-emerald-800/80 text-emerald-300'
-                      : 'bg-slate-900/80 border-slate-800 text-slate-300 hover:border-slate-700'
-                  }`}
-                >
-                  <button className="mt-0.5 shrink-0 text-slate-400">
-                    {isDone ? (
-                      <CheckCircle className="w-4 h-4 text-emerald-400" />
-                    ) : (
-                      <Square className="w-4 h-4" />
-                    )}
+                <li key={idx}>
+                  <button
+                    onClick={() => toggleSop(idx)}
+                    className={`flex w-full items-start gap-3 border-2 p-3 text-left text-[11px] leading-relaxed transition-colors duration-150 ${
+                      isDone
+                        ? 'border-risk-low bg-[#EAF5EF] text-risk-low'
+                        : 'border-ink bg-paper-raised text-ink-soft hover:bg-signal-soft'
+                    }`}
+                  >
+                    <span
+                      className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center border-2 ${
+                        isDone ? 'border-risk-low' : 'border-ink'
+                      }`}
+                    >
+                      {isDone ? <CheckCircle className="h-3 w-3" /> : <Square className="h-2 w-2 opacity-0" />}
+                    </span>
+                    <span className={isDone ? 'line-through opacity-80' : ''}>{action}</span>
                   </button>
-                  <p className={`leading-relaxed ${isDone ? 'line-through opacity-80' : ''}`}>
-                    {action}
-                  </p>
-                </div>
+                </li>
               );
             })}
-          </div>
-        </div>
+          </ul>
+        </Sheet>
       </div>
 
       {/* Mini Interactive GIS Map Centered on Target */}
-      <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-white flex items-center gap-2">
-            <Compass className="w-4 h-4 text-amber-400" />
-            <span>Target Geospatial Context & Buffer Zone</span>
+      <Sheet className="space-y-3 p-5">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-ink pb-3">
+          <h2 className="panel-title">
+            <Compass className="h-4 w-4 text-signal" />
+            Target geospatial context & buffer zone
           </h2>
-          <span className="font-mono text-xs text-slate-400">
-            Coordinates: {detection.lat.toFixed(4)}°N, {detection.lon.toFixed(4)}°E
+          <span className="annotation">
+            {detection.lat.toFixed(4)}°N, {detection.lon.toFixed(4)}°E
           </span>
         </div>
 
@@ -375,7 +361,9 @@ export const ResultDetailPage: React.FC<ResultDetailPageProps> = ({
           center={[detection.lat, detection.lon]}
           zoom={12}
         />
-      </div>
+      </Sheet>
+
+      <TitleBlock sheetNo={detection.id} view="Incident intelligence report" status={status} />
     </div>
   );
 };

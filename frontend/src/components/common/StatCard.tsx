@@ -7,6 +7,7 @@ interface StatCardProps {
   icon: React.ReactNode;
   trend?: string;
   trendPositive?: boolean;
+  /** Rule colour along the top edge of the card */
   accentColor?: string;
   onClick?: () => void;
 }
@@ -18,41 +19,44 @@ export const StatCard: React.FC<StatCardProps> = ({
   icon,
   trend,
   trendPositive,
-  accentColor = 'border-blue-500/30',
+  accentColor = 'bg-blueprint',
   onClick,
 }) => {
   return (
     <div
       onClick={onClick}
-      className={`glass-panel p-5 rounded-2xl border transition-all duration-300 hover:border-slate-600 hover:shadow-lg relative overflow-hidden group ${
-        onClick ? 'cursor-pointer' : ''
+      className={`sheet shadow-hard-sm group relative overflow-hidden p-4 transition-all duration-150 ${
+        onClick ? 'cursor-pointer hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard' : ''
       }`}
     >
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{title}</p>
-          <h3 className="text-2xl lg:text-3xl font-extrabold text-slate-100 font-mono mt-2 tracking-tight">
-            {value}
-          </h3>
-          {subtitle && <p className="text-xs text-slate-400 mt-1">{subtitle}</p>}
+      {/* Measurement rule along the top edge */}
+      <div className={`absolute inset-x-0 top-0 h-1 ${accentColor}`} />
+
+      <div className="flex items-start justify-between gap-3 pt-1">
+        <div className="min-w-0">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted">
+            {title}
+          </p>
+          <p className="kpi mt-2">{value}</p>
+          {subtitle && (
+            <p className="mt-1.5 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+              {subtitle}
+            </p>
+          )}
         </div>
-        <div className="p-3 rounded-xl bg-slate-800/80 text-slate-200 border border-slate-700/60 shadow-inner group-hover:scale-110 transition-transform">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center border-2 border-ink bg-paper text-ink transition-colors duration-150 group-hover:bg-signal group-hover:text-white">
           {icon}
-        </div>
+        </span>
       </div>
 
       {trend && (
-        <div className="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs">
-          <span className={trendPositive ? 'text-emerald-400 font-semibold' : 'text-rose-400 font-semibold'}>
+        <div className="mt-3 flex items-center justify-between border-t border-ink/15 pt-2 font-mono text-[10px] uppercase tracking-wider">
+          <span className={trendPositive ? 'font-bold text-risk-low' : 'font-bold text-signal'}>
             {trend}
           </span>
-          <span className="text-slate-400">vs 7-day baseline</span>
+          <span className="text-ink-faint">vs 7-day</span>
         </div>
       )}
-
-      {/* Subtle top indicator bar */}
-      <div className={`absolute top-0 left-0 right-0 h-0.5 ${accentColor}`} />
     </div>
   );
 };
-

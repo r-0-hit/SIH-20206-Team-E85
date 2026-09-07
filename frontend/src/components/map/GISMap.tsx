@@ -65,7 +65,7 @@ const createRiskIcon = (riskScore: number, isIndustrial: boolean) => {
   const html = `
     <div class="relative flex items-center justify-center w-8 h-8 cursor-pointer transform -translate-x-1/2 -translate-y-1/2">
       ${pulseHtml}
-      <div style="background-color: ${color}; box-shadow: 0 0 14px ${color};" class="w-7 h-7 ${iconClass} flex items-center justify-center text-white border-2 border-slate-900 z-10 hover:scale-125 transition-transform font-mono text-[10px] font-extrabold">
+      <div style="background-color: ${color}; box-shadow: 2px 2px 0 0 #0A0A0A;" class="w-7 h-7 ${iconClass} flex items-center justify-center text-white border-2 border-ink z-10 hover:scale-125 transition-transform font-mono text-[10px] font-extrabold">
         ${riskScore}
       </div>
     </div>
@@ -100,7 +100,7 @@ const createFirmsIcon = (frp: number) => {
 const facilityIcon = L.divIcon({
   html: `
     <div class="relative flex items-center justify-center w-8 h-8 cursor-pointer transform -translate-x-1/2 -translate-y-1/2">
-      <div class="w-7 h-7 rounded-lg bg-blue-600/90 text-white flex items-center justify-center border-2 border-slate-900 shadow-[0_0_12px_rgba(59,130,246,0.6)] hover:scale-125 transition-transform">
+      <div class="w-7 h-7 bg-blueprint text-white flex items-center justify-center border-2 border-ink shadow-[2px_2px_0_0_#0A0A0A] hover:scale-125 transition-transform">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
         </svg>
@@ -143,7 +143,7 @@ export const GISMap: React.FC<GISMapProps> = ({
   const [filterLow, setFilterLow] = useState(true);
   const [filterIndustrialOnly, setFilterIndustrialOnly] = useState(false);
 
-  // Manual Alert State
+  // Manual Telegram alert dispatch
   const [alertingId, setAlertingId] = useState<string | null>(null);
   const [mapAlertToast, setMapAlertToast] = useState<string | null>(null);
 
@@ -183,7 +183,7 @@ export const GISMap: React.FC<GISMapProps> = ({
   }, [externalSelected]);
 
   const tileUrls = {
-    dark: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+    dark: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
     satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     street: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
   };
@@ -226,44 +226,40 @@ export const GISMap: React.FC<GISMapProps> = ({
     : center;
 
   return (
-    <div className="relative rounded-2xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-950 flex flex-col" style={{ height }}>
+    <div className="sheet shadow-hard-sm relative flex flex-col overflow-hidden" style={{ height }}>
       {/* ── Top Operational Intelligence Header Banner ────────────────────────── */}
-      <div className="bg-[#0b101d]/95 border-b border-slate-800 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 shrink-0 z-[1000]">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-red-950/40 border border-red-800/60 px-2.5 py-1 rounded-full text-xs font-mono font-bold text-red-400">
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-            <span>NEAR-REAL-TIME FIRMS</span>
-          </div>
-          <div className="hidden md:flex items-center gap-3 text-xs font-mono text-slate-300">
-            <span><strong className="text-white">{detections.length}</strong> FIRMS HOTSPOTS</span>
-            <span className="text-slate-600">|</span>
-            <span className="text-red-400 font-bold">{criticalCount} CRITICAL</span>
-            <span className="text-slate-600">|</span>
-            <span className="text-orange-400 font-bold">{highCount} HIGH</span>
-            <span className="text-slate-600">|</span>
-            <span className="text-blue-400 font-bold">{industrialCount} INDUSTRIAL</span>
+      <div className="z-[1000] flex shrink-0 flex-wrap items-center justify-between gap-3 border-b-2 border-ink bg-paper-raised px-4 py-2.5">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="tag-danger">
+            <span className="h-1.5 w-1.5 animate-blink bg-risk-critical" />
+            NEAR-REAL-TIME FIRMS
+          </span>
+          <div className="hidden items-center gap-3 font-mono text-[10px] uppercase tracking-wider text-ink-muted md:flex">
+            <span><strong className="text-ink">{detections.length}</strong> HOTSPOTS</span>
+            <span className="text-ink/25">|</span>
+            <span className="font-bold text-risk-critical">{criticalCount} CRITICAL</span>
+            <span className="text-ink/25">|</span>
+            <span className="font-bold text-signal">{highCount} HIGH</span>
+            <span className="text-ink/25">|</span>
+            <span className="font-bold text-blueprint">{industrialCount} INDUSTRIAL</span>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="text-[11px] text-slate-400 font-mono hidden sm:block">
-            Last satellite pass: <strong className="text-slate-200">{lastUpdatedTime}</strong>
+          <div className="hidden font-mono text-[10px] uppercase tracking-wider text-ink-muted sm:block">
+            Last pass: <strong className="text-ink">{lastUpdatedTime}</strong>
           </div>
           <button
             onClick={handleManualRefresh}
             disabled={isRefreshing}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition border border-slate-700"
+            className="btn-secondary btn-sm"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-blue-400 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
             <span>{isRefreshing ? 'Syncing...' : 'Refresh'}</span>
           </button>
           <button
             onClick={() => setShowLayerMenu(!showLayerMenu)}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition border ${
-              showLayerMenu
-                ? 'bg-blue-600 border-blue-500 text-white'
-                : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
-            }`}
+            className={showLayerMenu ? 'btn-primary btn-sm' : 'btn-secondary btn-sm'}
           >
             <Layers className="w-3.5 h-3.5" />
             <span>Layers & Filters</span>
@@ -272,10 +268,10 @@ export const GISMap: React.FC<GISMapProps> = ({
       </div>
 
       {/* ── Time Slider / Trajectory Controller Bar ──────────────────────────── */}
-      <div className="bg-slate-900/90 border-b border-slate-800/80 px-4 py-2 flex items-center justify-between gap-4 text-xs z-[999]">
-        <div className="flex items-center gap-2 text-slate-400 font-mono text-[11px] shrink-0">
-          <Clock className="w-3.5 h-3.5 text-purple-400" />
-          <span>TIME TIMELINE:</span>
+      <div className="z-[999] flex items-center justify-between gap-4 border-b-2 border-ink bg-paper-sunk px-4 py-2 text-xs">
+        <div className="flex shrink-0 items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-ink">
+          <Clock className="h-3.5 w-3.5 text-blueprint" />
+          <span>Timeline:</span>
         </div>
         <div className="flex items-center gap-1 overflow-x-auto py-0.5 max-w-full">
           {[
@@ -290,23 +286,23 @@ export const GISMap: React.FC<GISMapProps> = ({
             <button
               key={t.step}
               onClick={() => setTimeStep(t.step)}
-              className={`px-2.5 py-1 rounded font-mono text-[11px] font-bold transition ${
+              className={`border-2 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider transition-all duration-150 ${
                 timeStep === t.step
                   ? t.step > 0
-                    ? 'bg-purple-600 text-white shadow-sm'
-                    : 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-slate-800/60 text-slate-400 hover:text-white'
+                    ? 'border-ink bg-blueprint text-white'
+                    : 'border-ink bg-ink text-paper-raised'
+                  : 'border-transparent text-ink-muted hover:border-ink hover:text-ink'
               }`}
             >
               {t.label}
             </button>
           ))}
         </div>
-        <div className="hidden lg:block text-[10px] font-mono text-slate-400 shrink-0">
+        <div className="hidden shrink-0 lg:block">
           {timeStep > 0 ? (
-            <span className="text-purple-300 font-semibold">🔮 PREDICTED RISK TRAJECTORY MODE</span>
+            <span className="tag-blueprint">PREDICTED TRAJECTORY MODE</span>
           ) : (
-            <span className="text-emerald-400 font-semibold">🛰️ OBSERVED SATELLITE SWATH MODE</span>
+            <span className="tag-ok">OBSERVED SWATH MODE</span>
           )}
         </div>
       </div>
@@ -325,9 +321,9 @@ export const GISMap: React.FC<GISMapProps> = ({
           />
 
           <TileLayer
-            attribution='&copy; <a href="https://www.esri.com/">Esri</a>, OpenStreetMap & NASA FIRMS'
+            attribution='&copy; <a href="https://carto.com/">CARTO</a> &amp; NASA FIRMS'
             url={tileUrls[mapLayer]}
-            maxZoom={18}
+            maxZoom={19}
           />
 
           {/* ── Industrial Facilities & Hazard Buffer Layer ────────────────── */}
@@ -336,19 +332,19 @@ export const GISMap: React.FC<GISMapProps> = ({
               <React.Fragment key={fac.id}>
                 <Marker position={[fac.lat, fac.lon]} icon={facilityIcon}>
                   <Popup>
-                    <div className="p-1 space-y-1.5 text-xs text-slate-200">
-                      <div className="flex items-center gap-1.5 font-bold text-blue-400">
+                    <div className="p-1 space-y-1.5 text-xs text-ink">
+                      <div className="flex items-center gap-1.5 font-bold text-blueprint">
                         <Factory className="w-4 h-4" />
                         <span>{fac.name}</span>
                       </div>
-                      <p className="text-slate-400">
-                        ID: <span className="font-mono text-slate-200">{fac.id}</span>
+                      <p className="text-ink-muted">
+                        ID: <span className="font-mono text-ink">{fac.id}</span>
                       </p>
-                      <p className="text-slate-400">
-                        Category: <span className="text-slate-200 font-mono capitalize">{fac.type.replace('_', ' ')}</span>
+                      <p className="text-ink-muted">
+                        Category: <span className="text-ink font-mono capitalize">{fac.type.replace('_', ' ')}</span>
                       </p>
-                      <p className="text-slate-400">
-                        Hazard Radius: <span className="font-mono text-amber-400">{fac.buffer_km} km</span>
+                      <p className="text-ink-muted">
+                        Hazard Radius: <span className="font-mono text-risk-moderate">{fac.buffer_km} km</span>
                       </p>
                       <button
                         onClick={(e) => {
@@ -356,10 +352,10 @@ export const GISMap: React.FC<GISMapProps> = ({
                           handleQuickAlert(fac);
                         }}
                         disabled={alertingId === fac.id}
-                        className="w-full mt-2 py-1.5 rounded-lg bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-[10px] flex items-center justify-center gap-1.5 transition shadow-sm disabled:opacity-50"
+                        className="btn-blueprint btn-sm mt-2 w-full"
                       >
-                        <Send className="w-3 h-3" />
-                        <span>{alertingId === fac.id ? 'Sending...' : '📢 Send Telegram Alert'}</span>
+                        <Send className="h-3 w-3" />
+                        <span>{alertingId === fac.id ? 'Sending…' : 'Send Telegram alert'}</span>
                       </button>
                     </div>
                   </Popup>
@@ -406,7 +402,7 @@ export const GISMap: React.FC<GISMapProps> = ({
                   }}
                 >
                   <Tooltip permanent={false} direction="center">
-                    <span className="font-mono text-[10px] text-white bg-slate-900 px-1.5 py-0.5 rounded border border-slate-700">
+                    <span className="font-mono text-[10px] text-ink bg-paper-sunk px-1.5 py-0.5 border-2 border-ink">
                       {distKm < 1 ? `${Math.round(distKm * 1000)} m` : `${distKm.toFixed(1)} km`}
                     </span>
                   </Tooltip>
@@ -449,23 +445,23 @@ export const GISMap: React.FC<GISMapProps> = ({
                 >
                   <Popup>
                     <div className="p-1 space-y-2 text-xs min-w-[210px]">
-                      <div className="flex items-center justify-between border-b border-slate-800 pb-1">
-                        <span className="font-mono text-[10px] text-slate-400">{d.id}</span>
+                      <div className="flex items-center justify-between border-b border-ink/15 pb-1">
+                        <span className="font-mono text-[10px] text-ink-muted">{d.id}</span>
                         <RiskBadge classification={d.classification} riskScore={displayRisk} showScore />
                       </div>
                       <div className="grid grid-cols-2 gap-1.5 font-mono text-[11px]">
-                        <div className="bg-slate-900 p-1 rounded">
-                          <span className="text-[9px] text-slate-400 block">FRP</span>
-                          <span className="font-bold text-amber-400">{d.frp} MW</span>
+                        <div className="bg-paper-sunk p-1 rounded">
+                          <span className="text-[9px] text-ink-muted block">FRP</span>
+                          <span className="font-bold text-risk-moderate">{d.frp} MW</span>
                         </div>
-                        <div className="bg-slate-900 p-1 rounded">
-                          <span className="text-[9px] text-slate-400 block">BRIGHTNESS</span>
-                          <span className="font-bold text-rose-400">{d.brightness} K</span>
+                        <div className="bg-paper-sunk p-1 rounded">
+                          <span className="text-[9px] text-ink-muted block">BRIGHTNESS</span>
+                          <span className="font-bold text-signal">{d.brightness} K</span>
                         </div>
                       </div>
                       <button
                         onClick={() => handleMarkerClick(d)}
-                        className="w-full py-1 rounded bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] flex items-center justify-center gap-1 transition"
+                        className="w-full py-1 bg-blueprint hover:bg-blueprint-deep text-white font-bold text-[10px] flex items-center justify-center gap-1 transition"
                       >
                         <Eye className="w-3 h-3" /> Inspect Anomaly
                       </button>
@@ -475,10 +471,10 @@ export const GISMap: React.FC<GISMapProps> = ({
                           handleQuickAlert(d);
                         }}
                         disabled={alertingId === d.id}
-                        className="w-full py-1 rounded bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-[10px] flex items-center justify-center gap-1 transition shadow-sm disabled:opacity-50"
+                        className="btn-secondary btn-sm w-full"
                       >
-                        <Send className="w-3 h-3" />
-                        <span>{alertingId === d.id ? 'Sending...' : '📢 Send Telegram Alert'}</span>
+                        <Send className="h-3 w-3" />
+                        <span>{alertingId === d.id ? 'Sending…' : 'Send Telegram alert'}</span>
                       </button>
                     </div>
                   </Popup>
@@ -487,39 +483,39 @@ export const GISMap: React.FC<GISMapProps> = ({
             })}
         </MapContainer>
 
-        {/* Floating In-Map Toast for Manual Alert Feedback */}
+        {/* Manual alert dispatch feedback */}
         {mapAlertToast && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1002] px-4 py-2 rounded-xl bg-sky-950/95 border border-sky-500/80 text-sky-200 text-xs font-semibold shadow-2xl flex items-center gap-2.5 animate-bounce">
-            <Send className="w-4 h-4 text-sky-400 shrink-0" />
-            <span>{mapAlertToast}</span>
-            <button onClick={() => setMapAlertToast(null)} className="ml-2 text-slate-400 hover:text-white">
-              <X className="w-3.5 h-3.5" />
+          <div className="sheet shadow-hard absolute left-1/2 top-4 z-[1002] flex -translate-x-1/2 animate-draw-in items-center gap-2.5 px-4 py-2">
+            <Send className="h-4 w-4 shrink-0 text-blueprint" />
+            <span className="font-mono text-[11px] uppercase tracking-wider text-ink">{mapAlertToast}</span>
+            <button onClick={() => setMapAlertToast(null)} className="ml-2 text-ink-muted hover:text-signal">
+              <X className="h-3.5 w-3.5" />
             </button>
           </div>
         )}
 
         {/* ── Layer Controls & Filter Popover Drawer ────────────────────────── */}
         {showLayerMenu && (
-          <div className="absolute top-3 right-3 z-[1001] w-72 glass-panel-elevated p-4 rounded-2xl border border-slate-700 shadow-2xl space-y-4 animate-in fade-in duration-200">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+          <div className="absolute top-3 right-3 z-[1001] w-72 sheet shadow-hard p-4 space-y-4 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between border-b-2 border-ink pb-2">
               <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                <Layers className="w-4 h-4 text-blue-400" /> Map Layers & Controls
+                <Layers className="w-4 h-4 text-blueprint" /> Map Layers & Controls
               </span>
-              <button onClick={() => setShowLayerMenu(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setShowLayerMenu(false)} className="text-ink-muted hover:text-signal">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Map Tiles */}
             <div className="space-y-1.5">
-              <span className="text-[10px] font-semibold text-slate-400 uppercase">Basemap</span>
+              <span className="text-[10px] font-semibold text-ink-muted uppercase">Basemap</span>
               <div className="grid grid-cols-3 gap-1">
                 {(['dark', 'satellite', 'street'] as const).map((m) => (
                   <button
                     key={m}
                     onClick={() => setMapLayer(m)}
-                    className={`py-1 text-[11px] font-semibold rounded capitalize border ${
-                      mapLayer === m ? 'bg-blue-600 border-blue-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-300'
+                    className={`py-1 text-[11px] font-semibold capitalize border ${
+                      mapLayer === m ? 'bg-blueprint border-ink text-white' : 'bg-paper border-ink text-ink-soft'
                     }`}
                   >
                     {m}
@@ -530,35 +526,35 @@ export const GISMap: React.FC<GISMapProps> = ({
 
             {/* Layers */}
             <div className="space-y-1.5">
-              <span className="text-[10px] font-semibold text-slate-400 uppercase">Feature Layers</span>
-              <div className="space-y-1 text-xs text-slate-300">
+              <span className="text-[10px] font-semibold text-ink-muted uppercase">Feature Layers</span>
+              <div className="space-y-1 text-xs text-ink-soft">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={showFirmsLayer} onChange={(e) => setShowFirmsLayer(e.target.checked)} className="rounded accent-blue-600" />
+                  <input type="checkbox" checked={showFirmsLayer} onChange={(e) => setShowFirmsLayer(e.target.checked)} className="rounded accent-[#F74B00]" />
                   <span>NASA FIRMS Raw Hotspots</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={showRiskLayer} onChange={(e) => setShowRiskLayer(e.target.checked)} className="rounded accent-blue-600" />
+                  <input type="checkbox" checked={showRiskLayer} onChange={(e) => setShowRiskLayer(e.target.checked)} className="rounded accent-[#F74B00]" />
                   <span>THERMOSAFE AI Risk Layer</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={showFacilitiesLayer} onChange={(e) => setShowFacilitiesLayer(e.target.checked)} className="rounded accent-blue-600" />
+                  <input type="checkbox" checked={showFacilitiesLayer} onChange={(e) => setShowFacilitiesLayer(e.target.checked)} className="rounded accent-[#F74B00]" />
                   <span>Industrial Facilities & Buffers</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={showVectorsLayer} onChange={(e) => setShowVectorsLayer(e.target.checked)} className="rounded accent-blue-600" />
+                  <input type="checkbox" checked={showVectorsLayer} onChange={(e) => setShowVectorsLayer(e.target.checked)} className="rounded accent-[#F74B00]" />
                   <span>Proximity Distance Vectors</span>
                 </label>
               </div>
             </div>
 
             {/* Risk Filters */}
-            <div className="space-y-1.5 pt-2 border-t border-slate-800">
-              <span className="text-[10px] font-semibold text-slate-400 uppercase">Risk Level Filters</span>
+            <div className="space-y-1.5 pt-2 border-t-2 border-ink">
+              <span className="text-[10px] font-semibold text-ink-muted uppercase">Risk Level Filters</span>
               <div className="grid grid-cols-2 gap-1 text-xs">
                 <button
                   onClick={() => setFilterCritical(!filterCritical)}
-                  className={`py-1 px-2 rounded text-[11px] font-semibold border text-left flex items-center justify-between ${
-                    filterCritical ? 'bg-red-950/80 border-red-800 text-red-300' : 'bg-slate-900 border-slate-800 text-slate-500'
+                  className={`py-1 px-2 text-[11px] font-semibold border text-left flex items-center justify-between ${
+                    filterCritical ? 'bg-red-950/80 border-red-800 text-risk-critical' : 'bg-paper-sunk border-ink/20 text-ink-faint'
                   }`}
                 >
                   <span>🔴 Critical (80+)</span>
@@ -566,8 +562,8 @@ export const GISMap: React.FC<GISMapProps> = ({
                 </button>
                 <button
                   onClick={() => setFilterHigh(!filterHigh)}
-                  className={`py-1 px-2 rounded text-[11px] font-semibold border text-left flex items-center justify-between ${
-                    filterHigh ? 'bg-orange-950/80 border-orange-800 text-orange-300' : 'bg-slate-900 border-slate-800 text-slate-500'
+                  className={`py-1 px-2 text-[11px] font-semibold border text-left flex items-center justify-between ${
+                    filterHigh ? 'bg-signal-soft border-signal text-signal-deep' : 'bg-paper-sunk border-ink/20 text-ink-faint'
                   }`}
                 >
                   <span>🟠 High (60-79)</span>
@@ -575,8 +571,8 @@ export const GISMap: React.FC<GISMapProps> = ({
                 </button>
                 <button
                   onClick={() => setFilterModerate(!filterModerate)}
-                  className={`py-1 px-2 rounded text-[11px] font-semibold border text-left flex items-center justify-between ${
-                    filterModerate ? 'bg-amber-950/80 border-amber-800 text-amber-300' : 'bg-slate-900 border-slate-800 text-slate-500'
+                  className={`py-1 px-2 text-[11px] font-semibold border text-left flex items-center justify-between ${
+                    filterModerate ? 'bg-[#FBF3E2] border-risk-moderate text-risk-moderate' : 'bg-paper-sunk border-ink/20 text-ink-faint'
                   }`}
                 >
                   <span>🟡 Moderate (35-59)</span>
@@ -584,8 +580,8 @@ export const GISMap: React.FC<GISMapProps> = ({
                 </button>
                 <button
                   onClick={() => setFilterLow(!filterLow)}
-                  className={`py-1 px-2 rounded text-[11px] font-semibold border text-left flex items-center justify-between ${
-                    filterLow ? 'bg-emerald-950/80 border-emerald-800 text-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-500'
+                  className={`py-1 px-2 text-[11px] font-semibold border text-left flex items-center justify-between ${
+                    filterLow ? 'bg-[#EAF5EF] border-risk-low text-risk-low' : 'bg-paper-sunk border-ink/20 text-ink-faint'
                   }`}
                 >
                   <span>🟢 Low (&lt;35)</span>
@@ -598,14 +594,14 @@ export const GISMap: React.FC<GISMapProps> = ({
 
         {/* ── Standout Click-to-Analyze Side Inspector Drawer ──────────────── */}
         {selectedAnomaly && (
-          <div className="absolute top-4 right-4 bottom-4 w-96 max-w-[calc(100vw-2.5rem)] glass-panel-elevated p-5 rounded-2xl border border-indigo-900/60 shadow-2xl flex flex-col justify-between z-[1002] animate-in slide-in-from-right duration-300 overflow-y-auto">
+          <div className="absolute top-4 right-4 bottom-4 w-96 max-w-[calc(100vw-2.5rem)] sheet shadow-hard p-5 border border-indigo-900/60 shadow-hard flex flex-col justify-between z-[1002] animate-in slide-in-from-right duration-300 overflow-y-auto">
             <div className="space-y-4">
               {/* Drawer Header */}
-              <div className="flex items-start justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-start justify-between border-b-2 border-ink pb-3">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs text-blue-400 font-bold">{selectedAnomaly.id}</span>
-                    <span className="text-[10px] text-slate-400 font-mono">
+                    <span className="font-mono text-xs text-blueprint font-bold">{selectedAnomaly.id}</span>
+                    <span className="text-[10px] text-ink-muted font-mono">
                       {selectedAnomaly.acq_date || '2026-09-07'} at {selectedAnomaly.acq_time || '2200'} UTC
                     </span>
                   </div>
@@ -615,41 +611,41 @@ export const GISMap: React.FC<GISMapProps> = ({
                 </div>
                 <button
                   onClick={() => setSelectedAnomaly(null)}
-                  className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition"
+                  className="p-1.5 bg-paper text-ink-muted hover:text-signal hover:bg-signal-soft transition"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
               {/* Threat Gauge & Badge */}
-              <div className="bg-slate-900/90 p-4 rounded-xl border border-slate-800 flex items-center justify-around">
+              <div className="bg-paper-sunk p-4 border border-ink/20 flex items-center justify-around">
                 <RiskMeter score={selectedAnomaly.risk_score} size="md" />
                 <div className="space-y-1.5">
                   <RiskBadge classification={selectedAnomaly.classification} />
-                  <div className="text-[11px] text-slate-400">
-                    ML Probability: <strong className="text-slate-200 font-mono">{Math.round(selectedAnomaly.confidence_score * 100)}%</strong>
+                  <div className="text-[11px] text-ink-muted">
+                    ML Probability: <strong className="text-ink font-mono">{Math.round(selectedAnomaly.confidence_score * 100)}%</strong>
                   </div>
-                  <div className="text-[11px] text-slate-400">
-                    Satellite: <strong className="text-slate-200 font-mono">{selectedAnomaly.satellite}</strong>
+                  <div className="text-[11px] text-ink-muted">
+                    Satellite: <strong className="text-ink font-mono">{selectedAnomaly.satellite}</strong>
                   </div>
                 </div>
               </div>
 
               {/* Radiometric Telemetry Grid */}
               <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-                <div className="glass-panel p-2.5 rounded-lg border border-slate-800">
-                  <span className="text-[10px] text-slate-400 block uppercase">Fire Rad. Power</span>
-                  <span className="text-amber-400 font-bold text-base">{selectedAnomaly.frp} MW</span>
+                <div className="sheet p-2.5 border border-ink/20">
+                  <span className="text-[10px] text-ink-muted block uppercase">Fire Rad. Power</span>
+                  <span className="text-risk-moderate font-bold text-base">{selectedAnomaly.frp} MW</span>
                 </div>
-                <div className="glass-panel p-2.5 rounded-lg border border-slate-800">
-                  <span className="text-[10px] text-slate-400 block uppercase">Brightness Temp</span>
-                  <span className="text-rose-400 font-bold text-base">{selectedAnomaly.brightness} K</span>
+                <div className="sheet p-2.5 border border-ink/20">
+                  <span className="text-[10px] text-ink-muted block uppercase">Brightness Temp</span>
+                  <span className="text-signal font-bold text-base">{selectedAnomaly.brightness} K</span>
                 </div>
               </div>
 
               {/* Thermal Twin Anomaly Metrics */}
-              <div className="glass-panel p-3 rounded-xl border border-purple-900/40 bg-purple-950/10 space-y-1.5 text-xs">
-                <div className="flex items-center justify-between text-purple-300 font-bold">
+              <div className="sheet p-3 border border-ink/20 bg-blueprint-soft space-y-1.5 text-xs">
+                <div className="flex items-center justify-between text-blueprint font-bold">
                   <span className="flex items-center gap-1.5">
                     <Activity className="w-3.5 h-3.5" /> Facility Thermal Twin
                   </span>
@@ -659,7 +655,7 @@ export const GISMap: React.FC<GISMapProps> = ({
                       : '+2.7σ'}
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-300 leading-relaxed">
+                <p className="text-[11px] text-ink-soft leading-relaxed">
                   {selectedAnomaly.thermal_twin?.alert_message ||
                     'Hotspot intensity is 2.4× above the learned 24-hour facility baseline.'}
                 </p>
@@ -668,32 +664,32 @@ export const GISMap: React.FC<GISMapProps> = ({
               {/* 2-Hour Projected Risk Trajectory */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-slate-300 flex items-center gap-1.5">
-                    <TrendingUp className="w-3.5 h-3.5 text-red-400" /> Projected Risk Trajectory
+                  <span className="font-bold text-ink-soft flex items-center gap-1.5">
+                    <TrendingUp className="w-3.5 h-3.5 text-risk-critical" /> Projected Risk Trajectory
                   </span>
-                  <span className="text-[10px] font-mono text-red-400 font-bold">ESCALATING</span>
+                  <span className="text-[10px] font-mono text-risk-critical font-bold">ESCALATING</span>
                 </div>
 
                 <div className="grid grid-cols-4 gap-1 text-center font-mono">
-                  <div className="bg-slate-900 p-2 rounded border border-slate-800">
-                    <span className="text-[9px] text-slate-500 block">NOW</span>
-                    <span className="text-sm font-bold text-red-400">{selectedAnomaly.risk_score}</span>
+                  <div className="bg-paper-sunk p-2 border border-ink/20">
+                    <span className="text-[9px] text-ink-faint block">NOW</span>
+                    <span className="text-sm font-bold text-risk-critical">{selectedAnomaly.risk_score}</span>
                   </div>
-                  <div className="bg-slate-900 p-2 rounded border border-slate-800">
-                    <span className="text-[9px] text-slate-500 block">+30m</span>
-                    <span className="text-sm font-bold text-red-400">
+                  <div className="bg-paper-sunk p-2 border border-ink/20">
+                    <span className="text-[9px] text-ink-faint block">+30m</span>
+                    <span className="text-sm font-bold text-risk-critical">
                       {Math.min(99, Math.round(selectedAnomaly.risk_score * 1.08))}
                     </span>
                   </div>
-                  <div className="bg-slate-900 p-2 rounded border border-slate-800">
-                    <span className="text-[9px] text-slate-500 block">+60m</span>
-                    <span className="text-sm font-bold text-red-400">
+                  <div className="bg-paper-sunk p-2 border border-ink/20">
+                    <span className="text-[9px] text-ink-faint block">+60m</span>
+                    <span className="text-sm font-bold text-risk-critical">
                       {Math.min(99, Math.round(selectedAnomaly.risk_score * 1.15))}
                     </span>
                   </div>
-                  <div className="bg-slate-900 p-2 rounded border border-slate-800">
-                    <span className="text-[9px] text-slate-500 block">+120m</span>
-                    <span className="text-sm font-bold text-red-400">
+                  <div className="bg-paper-sunk p-2 border border-ink/20">
+                    <span className="text-[9px] text-ink-faint block">+120m</span>
+                    <span className="text-sm font-bold text-risk-critical">
                       {Math.min(99, Math.round(selectedAnomaly.risk_score * 1.22))}
                     </span>
                   </div>
@@ -702,10 +698,10 @@ export const GISMap: React.FC<GISMapProps> = ({
             </div>
 
             {/* Action Buttons */}
-            <div className="pt-4 border-t border-slate-800 space-y-2">
+            <div className="pt-4 border-t-2 border-ink space-y-2">
               <button
                 onClick={() => onSelectDetection && onSelectDetection(selectedAnomaly)}
-                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs transition shadow-lg shadow-blue-500/20 flex items-center justify-center gap-1.5"
+                className="w-full py-2.5 btn-blueprint w-full flex items-center justify-center gap-1.5"
               >
                 <span>View Full AI Intelligence Report</span>
                 <ArrowUpRight className="w-4 h-4" />
@@ -714,7 +710,7 @@ export const GISMap: React.FC<GISMapProps> = ({
               {onRunWhatIf && (
                 <button
                   onClick={onRunWhatIf}
-                  className="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 font-semibold text-xs transition border border-slate-700 flex items-center justify-center gap-1.5"
+                  className="w-full py-2 bg-paper hover:bg-signal-soft text-blueprint font-semibold text-xs transition border-2 border-ink flex items-center justify-center gap-1.5"
                 >
                   <Sliders className="w-3.5 h-3.5 text-indigo-400" />
                   <span>Run What-If Scenario Simulation</span>
