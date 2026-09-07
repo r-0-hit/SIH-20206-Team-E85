@@ -20,6 +20,7 @@
     "morgan": "^1.10.0",
     "sqlite3": "^5.1.7",
     "swagger-ui-express": "^5.0.0",
+    "twilio": "^6.1.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -35,4 +36,3 @@
     "typescript": "^5.4.3"
   }
 }
-

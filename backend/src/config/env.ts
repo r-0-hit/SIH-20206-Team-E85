@@ -14,5 +14,16 @@ export const ENV = {
   CORS_ORIGIN: process.env.CORS_ORIGIN || '*',
   RATE_LIMIT_WINDOW_MS: 15 * 60 * 1000, // 15 mins
   RATE_LIMIT_MAX: 500, // requests per window
+
+  // SMS Alert Configuration
+  SMS_ALERT_ENABLED: process.env.SMS_ALERT_ENABLED === 'true',
+  SMS_RISK_THRESHOLD: parseInt(process.env.SMS_RISK_THRESHOLD || '75', 10),
+  SMS_ALERT_RECIPIENTS: process.env.SMS_ALERT_RECIPIENTS || '',
+  SMS_PROVIDER: process.env.SMS_PROVIDER || 'TWILIO',
+
+  // Twilio Credentials
+  TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID || '',
+  TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN || '',
+  TWILIO_PHONE_NUMBER: process.env.TWILIO_PHONE_NUMBER || '',
 };
 

@@ -125,6 +125,25 @@ export const initDatabase = async (): Promise<void> => {
     );
   `);
 
+  // SMS alert tracking table (for duplicate prevention and audit trail)
+  await run(`
+    CREATE TABLE IF NOT EXISTS sms_alerts (
+      id TEXT PRIMARY KEY,
+      analysis_id TEXT NOT NULL,
+      recipient_phone TEXT NOT NULL,
+      message_content TEXT NOT NULL,
+      provider TEXT NOT NULL DEFAULT 'TWILIO',
+      provider_message_id TEXT,
+      status TEXT NOT NULL DEFAULT 'PENDING',
+      error_message TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(analysis_id) REFERENCES analyses(id)
+    );
+  `);
+
+  await run('CREATE INDEX IF NOT EXISTS idx_sms_alerts_analysis ON sms_alerts(analysis_id);');
+  await run('CREATE INDEX IF NOT EXISTS idx_sms_alerts_status ON sms_alerts(status);');
+
   // Seed default users if table is empty
   const userCount = await getOne<{ count: number }>('SELECT COUNT(*) as count FROM users');
   if (userCount && userCount.count === 0) {

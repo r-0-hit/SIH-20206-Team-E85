@@ -172,3 +172,20 @@ CREATE TABLE IF NOT EXISTS alerts (
 CREATE INDEX IF NOT EXISTS idx_alerts_level ON alerts(alert_level);
 CREATE INDEX IF NOT EXISTS idx_alerts_acknowledged ON alerts(acknowledged);
 CREATE INDEX IF NOT EXISTS idx_alerts_created ON alerts(created_at);
+
+-- SMS notification tracking (duplicate prevention & audit trail)
+CREATE TABLE IF NOT EXISTS sms_alerts (
+    id TEXT PRIMARY KEY,
+    analysis_id TEXT NOT NULL,
+    recipient_phone TEXT NOT NULL,
+    message_content TEXT NOT NULL,
+    provider TEXT NOT NULL DEFAULT 'TWILIO',
+    provider_message_id TEXT,
+    status TEXT NOT NULL DEFAULT 'PENDING',  -- PENDING | SENT | FAILED
+    error_message TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(analysis_id) REFERENCES analyses(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_sms_alerts_analysis ON sms_alerts(analysis_id);
+CREATE INDEX IF NOT EXISTS idx_sms_alerts_status ON sms_alerts(status);

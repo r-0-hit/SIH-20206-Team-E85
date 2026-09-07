@@ -4,6 +4,7 @@ import { getOne, query, run } from '../config/database.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { firmsService } from '../services/firmsService.js';
 import { mlClientService } from '../services/mlClient.js';
+import { notificationService } from '../services/notificationService.js';
 import { AnalysisRecord, Facility } from '../types/index.js';
 
 const analyzeSchema = z.object({
@@ -98,6 +99,17 @@ export const analyzeThermalSource = async (req: AuthRequest, res: Response) => {
         req.ip || '127.0.0.1',
       ]
     );
+
+    // 4. Fire-and-forget: SMS alert if high-risk (does not block HTTP response)
+    notificationService.evaluateAndNotify({
+      analysisId,
+      lat: input.lat,
+      lon: input.lon,
+      classification: mlResult.classification,
+      riskScore: mlResult.risk_score,
+      nearestFacilityName: mlResult.nearest_facility.name,
+      facilityType: mlResult.nearest_facility.type,
+    });
 
     return res.status(201).json({
       success: true,
@@ -409,6 +421,17 @@ export const fetchFIRMSSwath = async (req: AuthRequest, res: Response) => {
       } catch (e) {
         // Continue gracefully if table constraint triggers
       }
+
+      // Fire-and-forget: SMS alert for high-risk FIRMS detections
+      notificationService.evaluateAndNotify({
+        analysisId,
+        lat: raw.lat,
+        lon: raw.lon,
+        classification: ml.classification,
+        riskScore: ml.risk_score,
+        nearestFacilityName: ml.nearest_facility.name,
+        facilityType: ml.nearest_facility.type,
+      });
 
       analyzedAnomalies.push({
         ...raw,
