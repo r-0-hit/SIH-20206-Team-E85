@@ -18,10 +18,10 @@ interface ThermalBaselineChartProps {
 }
 
 const SEVERITY_CONFIG = {
-  NORMAL:    { color: '#22c55e', bg: 'bg-emerald-500/20', text: 'text-emerald-400', label: 'Within Normal Range' },
-  ELEVATED:  { color: '#f59e0b', bg: 'bg-amber-500/20',   text: 'text-amber-400',   label: 'Elevated' },
-  ANOMALOUS: { color: '#f97316', bg: 'bg-orange-500/20',  text: 'text-orange-400',  label: '⚠ Anomalous' },
-  EXTREME:   { color: '#ef4444', bg: 'bg-red-500/20',     text: 'text-red-400',     label: '🔴 Extreme Deviation' },
+  NORMAL:    { color: '#22c55e', bg: 'bg-risk-low/20', text: 'text-risk-low', label: 'Within Normal Range' },
+  ELEVATED:  { color: '#B47A00', bg: 'bg-risk-moderate/20',   text: 'text-risk-moderate',   label: 'Elevated' },
+  ANOMALOUS: { color: '#F74B00', bg: 'bg-signal/20',  text: 'text-signal',  label: '⚠ Anomalous' },
+  EXTREME:   { color: '#D42200', bg: 'bg-risk-critical/20',     text: 'text-risk-critical',     label: '🔴 Extreme Deviation' },
 };
 
 /** Generates a realistic synthetic baseline when no API data is available (demo mode). */
@@ -109,19 +109,19 @@ export const ThermalBaselineChart: React.FC<ThermalBaselineChartProps> = ({
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
-          <Activity className="w-4 h-4 text-blue-400" />
+          <Activity className="w-4 h-4 text-blueprint" />
           <div>
-            <h3 className="text-sm font-bold text-white">Facility Thermal Baseline</h3>
-            <p className="text-[11px] text-slate-400">{facilityName} — 24-hour learned pattern</p>
+            <h3 className="text-sm font-bold text-ink">Facility Thermal Baseline</h3>
+            <p className="text-[11px] text-ink-muted">{facilityName} — 24-hour learned pattern</p>
           </div>
         </div>
-        <div className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border ${cfg.bg} ${cfg.text} border-current/20`}>
+        <div className={`px-2.5 py-1 text-[11px] font-bold border ${cfg.bg} ${cfg.text} border-current/20`}>
           {cfg.label}
         </div>
       </div>
 
       {/* SVG Chart */}
-      <div className="rounded-xl overflow-hidden bg-slate-950/60 border border-slate-800">
+      <div className="overflow-hidden bg-paper-sunk/60 border-2 border-ink">
         <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: '140px' }}>
           {/* Gridlines */}
           {[0.25, 0.5, 0.75, 1.0].map((pct) => {
@@ -129,7 +129,7 @@ export const ThermalBaselineChart: React.FC<ThermalBaselineChartProps> = ({
             const val = Math.round(minFrp + pct * (maxFrp - minFrp));
             return (
               <g key={pct}>
-                <line x1={PAD_L} y1={y} x2={W - PAD_R} y2={y} stroke="#334155" strokeWidth="0.5" strokeDasharray="3,3" />
+                <line x1={PAD_L} y1={y} x2={W - PAD_R} y2={y} stroke="rgba(10,10,10,0.12)" strokeWidth="0.5" strokeDasharray="3,3" />
                 <text x={PAD_L - 4} y={y + 3.5} textAnchor="end" fontSize="8" fill="#64748b">{val}</text>
               </g>
             );
@@ -143,13 +143,13 @@ export const ThermalBaselineChart: React.FC<ThermalBaselineChartProps> = ({
           ))}
 
           {/* Std dev band */}
-          <path d={bandPath} fill="#3b82f6" fillOpacity="0.08" />
+          <path d={bandPath} fill="#1438AA" fillOpacity="0.08" />
 
           {/* Mean area fill */}
-          <path d={areaPath} fill="#3b82f6" fillOpacity="0.05" />
+          <path d={areaPath} fill="#1438AA" fillOpacity="0.05" />
 
           {/* Mean line */}
-          <path d={meanPath} fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeLinejoin="round" />
+          <path d={meanPath} fill="none" stroke="#1438AA" strokeWidth="1.5" strokeLinejoin="round" />
 
           {/* Current hour vertical guide */}
           <line x1={cx} y1={PAD_T} x2={cx} y2={H - PAD_B} stroke={cfg.color} strokeWidth="1" strokeDasharray="4,2" opacity="0.6" />
@@ -174,41 +174,41 @@ export const ThermalBaselineChart: React.FC<ThermalBaselineChartProps> = ({
 
       {/* Stats row */}
       <div className="grid grid-cols-3 gap-2 text-center">
-        <div className="glass-panel rounded-lg p-2 border border-slate-800">
-          <div className="text-xs font-bold text-blue-400 font-mono">
+        <div className="sheet p-2 border-2 border-ink">
+          <div className="text-xs font-bold text-blueprint font-mono">
             {baseline.hourly_means[hour]?.toFixed(0) ?? '–'} MW
           </div>
-          <div className="text-[10px] text-slate-400">Expected at {hour}:00</div>
+          <div className="text-[10px] text-ink-muted">Expected at {hour}:00</div>
         </div>
-        <div className={`glass-panel rounded-lg p-2 border ${severity !== 'NORMAL' ? 'border-orange-800/60' : 'border-slate-800'}`}>
+        <div className={`sheet p-2 border ${severity !== 'NORMAL' ? 'border-orange-800/60' : 'border-ink/20'}`}>
           <div className={`text-xs font-bold font-mono ${cfg.text}`}>
             {anomalyRatio.toFixed(1)}×
           </div>
-          <div className="text-[10px] text-slate-400">Above baseline</div>
+          <div className="text-[10px] text-ink-muted">Above baseline</div>
         </div>
-        <div className="glass-panel rounded-lg p-2 border border-slate-800">
-          <div className="text-xs font-bold text-purple-400 font-mono">
+        <div className="sheet p-2 border-2 border-ink">
+          <div className="text-xs font-bold text-steel font-mono">
             z = {zScore.toFixed(1)}
           </div>
-          <div className="text-[10px] text-slate-400">Std deviations</div>
+          <div className="text-[10px] text-ink-muted">Std deviations</div>
         </div>
       </div>
 
       {/* Alert message */}
       {twinResult?.alert_message && (
-        <div className="p-3 rounded-xl bg-red-950/40 border border-red-800/60 text-xs text-red-300 font-medium leading-relaxed">
+        <div className="p-3 bg-red-950/40 border border-red-800/60 text-xs text-risk-critical font-medium leading-relaxed">
           {twinResult.alert_message}
         </div>
       )}
 
       {/* Legend */}
-      <div className="flex items-center gap-4 text-[10px] text-slate-400">
+      <div className="flex items-center gap-4 text-[10px] text-ink-muted">
         <span className="flex items-center gap-1.5">
-          <span className="inline-block w-4 h-0.5 bg-blue-500 rounded" />
+          <span className="inline-block w-4 h-0.5 bg-blueprint rounded" />
           Learned baseline (mean ± 1σ)
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="inline-block w-2.5 h-2.5 rounded-full bg-current" style={{ color: cfg.color }} />
+          <span className="inline-block w-2.5 h-2.5  bg-current" style={{ color: cfg.color }} />
           Current observation
         </span>
       </div>

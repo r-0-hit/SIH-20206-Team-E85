@@ -29,7 +29,7 @@ const SLIDERS: SliderConfig[] = [
     max: 800,
     step: 10,
     unit: 'MW',
-    color: '#f59e0b',
+    color: '#B47A00',
     description: 'Fire Radiative Power — current satellite measurement',
   },
   {
@@ -39,7 +39,7 @@ const SLIDERS: SliderConfig[] = [
     max: 150,
     step: 5,
     unit: '% / revisit',
-    color: '#ef4444',
+    color: '#D42200',
     description: 'How fast the thermal intensity is increasing per satellite pass',
   },
   {
@@ -49,7 +49,7 @@ const SLIDERS: SliderConfig[] = [
     max: 500,
     step: 10,
     unit: 'K people',
-    color: '#8b5cf6',
+    color: '#4A576A',
     description: 'Estimated population within 3 km of the hotspot',
   },
   {
@@ -59,7 +59,7 @@ const SLIDERS: SliderConfig[] = [
     max: 15,
     step: 0.5,
     unit: 'km',
-    color: '#3b82f6',
+    color: '#1438AA',
     description: 'Proximity to the nearest industrial facility',
   },
 ];
@@ -184,27 +184,25 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sliders className="w-4 h-4 text-indigo-400" />
+          <Sliders className="h-4 w-4 text-blueprint" />
           <div>
-            <h3 className="text-sm font-bold text-white">What-If Scenario Simulator</h3>
-            <p className="text-[11px] text-slate-400">
-              Adjust parameters to project how risk could evolve
-            </p>
+            <h3 className="panel-title">What-if scenario simulator</h3>
+            <p className="annotation mt-0.5">Adjust parameters to project how risk could evolve</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={handleReset}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition"
+            className="btn-secondary btn-sm"
           >
-            <RotateCcw className="w-3 h-3" />
+            <RotateCcw className="h-3 w-3" />
             Reset
           </button>
           <button
             onClick={handleRunNow}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition"
+            className="btn-primary btn-sm"
           >
-            <Zap className="w-3 h-3" />
+            <Zap className="h-3 w-3" />
             Simulate
           </button>
         </div>
@@ -216,14 +214,11 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
           const val = scenario[s.id as keyof typeof scenario] as number;
           const pct = ((val - s.min) / (s.max - s.min)) * 100;
           return (
-            <div key={s.id} className="glass-panel p-3.5 rounded-xl border border-slate-800 space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-[11px] font-semibold text-slate-300">{s.label}</span>
-                <span
-                  className="text-sm font-extrabold font-mono"
-                  style={{ color: s.color }}
-                >
-                  {val} {s.unit}
+            <div key={s.id} className="sheet space-y-2 border-2 border-ink p-3.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="key">{s.label}</span>
+                <span className="font-display text-sm font-extrabold text-ink">
+                  {val} <span className="font-mono text-[10px] text-ink-muted">{s.unit}</span>
                 </span>
               </div>
               <input
@@ -233,29 +228,29 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
                 step={s.step}
                 value={val}
                 onChange={(e) => handleChange(s.id, parseFloat(e.target.value))}
-                className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+                className="range-ink h-1.5 w-full cursor-pointer appearance-none border border-ink"
                 style={{
-                  background: `linear-gradient(to right, ${s.color} ${pct}%, #334155 ${pct}%)`,
+                  background: `linear-gradient(to right, ${s.color} ${pct}%, #EAE9E4 ${pct}%)`,
                 }}
               />
-              <p className="text-[10px] text-slate-500">{s.description}</p>
+              <p className="text-[10px] leading-relaxed text-ink-muted">{s.description}</p>
             </div>
           );
         })}
       </div>
 
       {/* Facility type picker */}
-      <div className="glass-panel p-3.5 rounded-xl border border-slate-800 space-y-2">
-        <span className="text-[11px] font-semibold text-slate-300">Facility Type</span>
+      <div className="sheet p-3.5 border-2 border-ink space-y-2">
+        <span className="key">Facility type</span>
         <div className="flex flex-wrap gap-2">
           {FACILITY_OPTIONS.map((opt) => (
             <button
               key={opt.value}
               onClick={() => handleChange('facility_type', opt.value)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition border ${
+              className={`border-2 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition-all duration-150 ${
                 scenario.facility_type === opt.value
-                  ? 'bg-indigo-600 border-indigo-500 text-white'
-                  : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-600'
+                  ? 'border-ink bg-ink text-paper-raised'
+                  : 'border-ink bg-paper-raised text-ink hover:bg-signal-soft'
               }`}
             >
               {opt.label}
@@ -266,14 +261,14 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
 
       {/* Output timeline */}
       {(timeline || loading) && (
-        <div className="glass-panel p-4 rounded-xl border border-indigo-900/40 bg-indigo-950/10">
+        <div className="sheet border-2 border-ink bg-paper p-4">
           <RiskTimelineCard timeline={timeline} loading={loading} baseRisk={scenario.base_frp > 0 ? Math.round(scenario.base_frp / 10) : 65} />
         </div>
       )}
 
       {!timeline && !loading && (
-        <div className="text-center py-6 text-slate-500 text-xs">
-          Adjust sliders and click <strong>Simulate</strong> to project risk
+        <div className="border-2 border-dashed border-ink/30 py-6 text-center font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+          Adjust sliders and press <strong className="text-ink">Simulate</strong> to project risk
         </div>
       )}
     </div>

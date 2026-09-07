@@ -7,57 +7,40 @@ interface RiskBadgeProps {
   showScore?: boolean;
 }
 
-export const RiskBadge: React.FC<RiskBadgeProps> = ({ classification, riskScore, showScore = false }) => {
-  const getBadgeStyle = () => {
-    switch (classification) {
-      case 'INDUSTRIAL_ACCIDENTAL_FIRE':
-        return 'bg-red-950/70 text-red-400 border-red-800/80 shadow-[0_0_12px_rgba(239,68,68,0.25)]';
-      case 'INDUSTRIAL_PERSISTENT':
-        return 'bg-purple-950/70 text-purple-400 border-purple-800/80 shadow-[0_0_10px_rgba(168,85,247,0.2)]';
-      case 'WILDFIRE':
-        return 'bg-orange-950/70 text-orange-400 border-orange-800/80';
-      case 'AGRICULTURAL_BURNING':
-        return 'bg-amber-950/70 text-amber-400 border-amber-800/80';
-      case 'MINING_EXTRACTION':
-        return 'bg-slate-800/80 text-slate-300 border-slate-700';
-      case 'OTHER_OR_FALSE_ALARM':
-        return 'bg-emerald-950/60 text-emerald-400 border-emerald-800/80';
-      default:
-        return 'bg-slate-800 text-slate-300 border-slate-700';
-    }
-  };
+const STYLES: Record<string, string> = {
+  INDUSTRIAL_ACCIDENTAL_FIRE: 'border-risk-critical bg-[#FDECE8] text-risk-critical',
+  INDUSTRIAL_PERSISTENT: 'border-blueprint bg-blueprint-soft text-blueprint',
+  WILDFIRE: 'border-signal bg-signal-soft text-signal-deep',
+  AGRICULTURAL_BURNING: 'border-risk-moderate bg-[#FBF3E2] text-risk-moderate',
+  MINING_EXTRACTION: 'border-steel bg-steel-soft text-steel',
+  OTHER_OR_FALSE_ALARM: 'border-risk-low bg-[#EAF5EF] text-risk-low',
+};
 
-  const getReadableName = () => {
-    switch (classification) {
-      case 'INDUSTRIAL_ACCIDENTAL_FIRE':
-        return 'Industrial Accidental Fire';
-      case 'INDUSTRIAL_PERSISTENT':
-        return 'Industrial Operational Flare';
-      case 'WILDFIRE':
-        return 'Wildfire / Forest Fire';
-      case 'AGRICULTURAL_BURNING':
-        return 'Agricultural Stubble Burning';
-      case 'MINING_EXTRACTION':
-        return 'Mining Seam Fire';
-      case 'OTHER_OR_FALSE_ALARM':
-        return 'False Alarm / Solar Glint';
-      default:
-        return classification || 'Unknown';
-    }
-  };
+const NAMES: Record<string, string> = {
+  INDUSTRIAL_ACCIDENTAL_FIRE: 'Industrial Accidental Fire',
+  INDUSTRIAL_PERSISTENT: 'Operational Flare',
+  WILDFIRE: 'Wildfire / Forest',
+  AGRICULTURAL_BURNING: 'Agricultural Burning',
+  MINING_EXTRACTION: 'Mining Seam Fire',
+  OTHER_OR_FALSE_ALARM: 'False Alarm / Glint',
+};
+
+export const RiskBadge: React.FC<RiskBadgeProps> = ({
+  classification,
+  riskScore,
+  showScore = false,
+}) => {
+  const key = classification || '';
+  const style = STYLES[key] || 'border-ink bg-paper-raised text-ink';
+  const name = NAMES[key] || classification || 'Unknown';
 
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${getBadgeStyle()}`}
-    >
-      <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-      {getReadableName()}
+    <span className={`tag whitespace-nowrap ${style}`}>
+      <span className="h-1.5 w-1.5 bg-current" />
+      {name}
       {showScore && riskScore !== undefined && (
-        <span className="ml-1 px-1.5 py-0.5 text-[10px] rounded bg-black/40 font-mono font-bold">
-          {riskScore}/100
-        </span>
+        <span className="ml-1 border-l border-current/30 pl-1.5 font-bold">{riskScore}/100</span>
       )}
     </span>
   );
 };
-

@@ -17,7 +17,7 @@ interface LandingPageProps {
  */
 export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   return (
-    <div className="min-h-screen bg-[#090D16] text-slate-50">
+    <div className="min-h-screen bg-paper text-ink">
       <SiteHeader onNavigate={onNavigate} />
       <main>
         <Hero onNavigate={onNavigate} />

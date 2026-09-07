@@ -52,52 +52,60 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate
   };
 
   return (
-    <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center px-4 py-12">
-      <div className="max-w-md w-full glass-panel-elevated p-8 rounded-3xl border border-slate-700 shadow-2xl space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-600 to-amber-600 mx-auto flex items-center justify-center shadow-lg shadow-rose-600/30">
-            <Flame className="w-7 h-7 text-white" />
-          </div>
-          <h1 className="text-2xl font-black text-white tracking-tight">
-            {isRegister ? 'Create Analyst Account' : 'Welcome to PyroGuard AI'}
+    <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12">
+      <div className="sheet sheet-framed shadow-hard w-full max-w-md space-y-6 p-8">
+        {/* Stamp */}
+        <div className="space-y-3 border-b-2 border-ink pb-4 text-center">
+          <span className="mx-auto flex h-12 w-12 items-center justify-center border-2 border-ink bg-signal">
+            <Flame className="h-6 w-6 text-white" />
+          </span>
+          <h1 className="font-display text-2xl font-extrabold uppercase tracking-tight text-ink">
+            {isRegister ? 'Create analyst account' : 'PyroGuard AI access'}
           </h1>
-          <p className="text-xs text-slate-400">
+          <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-muted">
             {isRegister
               ? 'Register credentials for satellite GIS intelligence'
-              : 'Sign in to access industrial fire detection telemetry'}
+              : 'Sign in to access thermal detection telemetry'}
           </p>
         </div>
 
         {error && (
-          <div className="p-3.5 rounded-xl bg-red-950/80 border border-red-800 text-red-300 text-xs flex items-center gap-2.5">
-            <ShieldAlert className="w-4 h-4 text-red-400 shrink-0" />
+          <div className="flex items-center gap-2.5 border-2 border-risk-critical bg-[#FDECE8] px-3.5 py-3 font-mono text-[11px] uppercase tracking-wider text-risk-critical">
+            <ShieldAlert className="h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {/* 1-Click Demo Buttons */}
         {!isRegister && (
-          <div className="space-y-2 pt-1 border-b border-slate-800 pb-4">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block text-center">
-              Quick 1-Click Demo Credentials
+          <div className="space-y-2 border-b-2 border-ink pb-5">
+            <span className="block text-center font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted">
+              Quick demo credentials
             </span>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => loginWithDemo('admin@pyroguard.ai', 'Admin@12345')}
-                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold transition text-center group"
+                className="sheet sheet-hover shadow-hard-sm p-2.5 text-center"
               >
-                <span className="block text-[11px] font-bold text-rose-400">Chief Admin</span>
-                <span className="text-[9px] text-slate-400 block font-mono">Full Permissions</span>
+                <span className="block font-display text-[11px] font-extrabold uppercase text-signal">
+                  Chief admin
+                </span>
+                <span className="block font-mono text-[9px] uppercase tracking-wider text-ink-muted">
+                  Full permissions
+                </span>
               </button>
               <button
                 type="button"
                 onClick={() => loginWithDemo('analyst@pyroguard.ai', 'Analyst@12345')}
-                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold transition text-center group"
+                className="sheet sheet-hover shadow-hard-sm p-2.5 text-center"
               >
-                <span className="block text-[11px] font-bold text-blue-400">GIS Analyst</span>
-                <span className="text-[9px] text-slate-400 block font-mono">Operations</span>
+                <span className="block font-display text-[11px] font-extrabold uppercase text-blueprint">
+                  GIS analyst
+                </span>
+                <span className="block font-mono text-[9px] uppercase tracking-wider text-ink-muted">
+                  Operations
+                </span>
               </button>
             </div>
           </div>
@@ -107,38 +115,38 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate
           {isRegister && (
             <>
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Full Name</label>
+                <label className="label">Full Name</label>
                 <div className="relative">
-                  <UserIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <UserIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
                   <input
                     type="text"
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Dr. John Doe"
-                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
+                    className="input pl-9"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Username</label>
+                <label className="label">Username</label>
                 <input
                   type="text"
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="johndoe"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
+                  className="input"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Role</label>
+                <label className="label">Role</label>
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value as any)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
+                  className="input"
                 >
                   <option value="ANALYST">GIS Analyst (Review & Verify)</option>
                   <option value="ADMIN">System Administrator (Full Control)</option>
@@ -148,31 +156,31 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
+            <label className="label">Email Address</label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="analyst@pyroguard.ai"
-                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
+                className="input pl-9"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Password</label>
+            <label className="label">Password</label>
             <div className="relative">
-              <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
+                className="input pl-9"
               />
             </div>
           </div>
@@ -180,10 +188,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs transition shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 disabled:opacity-50"
+            className="btn-primary w-full py-3"
           >
-            <span>{loading ? 'Authenticating...' : isRegister ? 'Complete Registration' : 'Sign In'}</span>
-            <ArrowRight className="w-4 h-4" />
+            {loading ? 'Authenticating…' : isRegister ? 'Complete registration' : 'Sign in'}
+            <ArrowRight className="h-4 w-4" />
           </button>
         </form>
 
@@ -194,11 +202,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate
               setIsRegister(!isRegister);
               setError(null);
             }}
-            className="text-xs text-blue-400 hover:text-blue-300 font-semibold"
+            className="font-mono text-[10px] font-bold uppercase tracking-wider text-blueprint hover:text-signal"
           >
             {isRegister
-              ? 'Already registered? Sign in with existing credentials'
-              : "Don't have an analyst account? Register here"}
+              ? 'Already registered? Sign in'
+              : 'No analyst account? Register here'}
           </button>
         </div>
       </div>

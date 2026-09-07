@@ -20,75 +20,92 @@ const PIPELINE = [
   { step: '04', title: 'Dispatch', body: 'Human-readable evidence and the matching response protocol.' },
 ];
 
-export const Platform: React.FC = () => {
-  return (
-    <section id="platform" className="relative py-20 sm:py-24 lg:py-28">
-      <div className="section-shell">
-        <div className="mx-auto max-w-2xl text-center">
-          <span className="eyebrow">The platform</span>
-          <h2 className="mt-5 text-3xl font-extrabold tracking-tight text-slate-50 sm:text-4xl">
+export const Platform: React.FC = () => (
+  <section id="platform" className="border-b-2 border-ink py-14 sm:py-20">
+    <div className="section-shell">
+      <div className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <span className="tag-solid">01 · THE PLATFORM</span>
+          <h2 className="rule-title mt-3 max-w-2xl">
             Satellites see the heat. They don't see the difference.
           </h2>
         </div>
-
-        <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2">
-          <article className="glass-card p-7 sm:p-8">
-            <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl border border-rose-500/25 bg-rose-500/10">
-              <AlertTriangle className="h-5 w-5 text-rose-400" />
-            </span>
-            <h3 className="mt-5 text-xl font-bold text-white">The monitoring gap</h3>
-            <p className="mt-3 text-sm leading-relaxed text-slate-400">
-              NASA FIRMS reports raw thermal anomalies, but cannot say whether a hotspot is
-              an oil refinery explosion, a permitted gas flare, seasonal stubble burning or
-              a remote forest fire.
-            </p>
-            <ul className="mt-5 space-y-2.5">
-              {GAPS.map((item) => (
-                <li key={item} className="flex items-start gap-2.5 text-sm text-slate-400">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-500" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </article>
-
-          <article className="glass-card p-7 sm:p-8">
-            <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl border border-accent-500/25 bg-accent-500/10">
-              <Cpu className="h-5 w-5 text-accent-400" />
-            </span>
-            <h3 className="mt-5 text-xl font-bold text-white">The PyroGuard answer</h3>
-            <p className="mt-3 text-sm leading-relaxed text-slate-400">
-              A multi-stage framework combining spatio-temporal persistence tracking,
-              geospatial proximity fusion and calibrated random forest ensembles — every
-              verdict backed by explainable evidence.
-            </p>
-            <ul className="mt-5 space-y-2.5">
-              {ANSWERS.map((item) => (
-                <li key={item} className="flex items-start gap-2.5 text-sm text-slate-400">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-400" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </article>
-        </div>
-
-        {/* Pipeline strip */}
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {PIPELINE.map((stage, index) => (
-            <div key={stage.step} className="glass-card p-6">
-              <div className="flex items-center gap-3">
-                <span className="font-mono text-xs font-bold text-accent-400">{stage.step}</span>
-                {index < PIPELINE.length - 1 && (
-                  <ArrowRight className="hidden h-3.5 w-3.5 text-slate-600 lg:block" />
-                )}
-              </div>
-              <h4 className="mt-3 text-base font-bold text-white">{stage.title}</h4>
-              <p className="mt-1.5 text-xs leading-relaxed text-slate-400">{stage.body}</p>
-            </div>
-          ))}
-        </div>
+        <span className="annotation">Problem statement · SIH 2026</span>
       </div>
-    </section>
-  );
-};
+
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        {/* Gap */}
+        <article className="sheet shadow-hard-sm p-6">
+          <div className="flex items-center gap-3 border-b-2 border-ink pb-3">
+            <span className="flex h-9 w-9 items-center justify-center border-2 border-ink bg-risk-critical">
+              <AlertTriangle className="h-4 w-4 text-white" />
+            </span>
+            <h3 className="font-display text-lg font-extrabold uppercase tracking-tight text-ink">
+              The monitoring gap
+            </h3>
+          </div>
+          <p className="mt-4 text-sm leading-relaxed text-ink-soft">
+            NASA FIRMS reports raw thermal anomalies, but cannot say whether a hotspot is an oil
+            refinery explosion, a permitted gas flare, seasonal stubble burning or a remote forest
+            fire.
+          </p>
+          <ul className="mt-4 space-y-2.5">
+            {GAPS.map((item) => (
+              <li key={item} className="flex items-start gap-2.5 text-[13px] leading-relaxed text-ink-soft">
+                <span className="mt-1.5 h-2 w-2 shrink-0 bg-risk-critical" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </article>
+
+        {/* Answer */}
+        <article className="sheet shadow-hard-sm p-6">
+          <div className="flex items-center gap-3 border-b-2 border-ink pb-3">
+            <span className="flex h-9 w-9 items-center justify-center border-2 border-ink bg-blueprint">
+              <Cpu className="h-4 w-4 text-white" />
+            </span>
+            <h3 className="font-display text-lg font-extrabold uppercase tracking-tight text-ink">
+              The PyroGuard answer
+            </h3>
+          </div>
+          <p className="mt-4 text-sm leading-relaxed text-ink-soft">
+            A multi-stage framework combining spatio-temporal persistence tracking, geospatial
+            proximity fusion and calibrated random forest ensembles — every verdict backed by
+            explainable evidence.
+          </p>
+          <ul className="mt-4 space-y-2.5">
+            {ANSWERS.map((item) => (
+              <li key={item} className="flex items-start gap-2.5 text-[13px] leading-relaxed text-ink-soft">
+                <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center border-2 border-ink">
+                  <span className="h-1.5 w-1.5 bg-signal" />
+                </span>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </article>
+      </div>
+
+      {/* Process diagram */}
+      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {PIPELINE.map((stage, index) => (
+          <div key={stage.step} className="relative">
+            <div className="sheet shadow-hard-sm h-full p-5">
+              <span className="font-mono text-[11px] font-bold tracking-[0.14em] text-signal">
+                {stage.step}
+              </span>
+              <h4 className="mt-2 font-display text-base font-extrabold uppercase tracking-tight text-ink">
+                {stage.title}
+              </h4>
+              <p className="mt-1.5 text-[11px] leading-relaxed text-ink-muted">{stage.body}</p>
+            </div>
+            {index < PIPELINE.length - 1 && (
+              <ArrowRight className="absolute -right-4 top-1/2 hidden h-4 w-4 -translate-y-1/2 text-ink lg:block" />
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);

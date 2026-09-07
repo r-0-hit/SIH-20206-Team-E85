@@ -6,10 +6,10 @@ interface SiteHeaderProps {
 }
 
 const NAV_LINKS = [
-  { href: '#platform', label: 'Platform' },
-  { href: '#capabilities', label: 'Capabilities' },
-  { href: '#impact', label: 'Impact' },
-  { href: '#deployment', label: 'Deployment' },
+  { href: '#platform', label: 'Platform', no: '01' },
+  { href: '#capabilities', label: 'Capabilities', no: '02' },
+  { href: '#impact', label: 'Impact', no: '03' },
+  { href: '#deployment', label: 'Deployment', no: '04' },
 ];
 
 export const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate }) => {
@@ -25,94 +25,81 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate }) => {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? 'border-b border-white/10 bg-[#090D16]/85 backdrop-blur-xl'
-          : 'border-b border-transparent bg-transparent'
+      className={`sticky top-0 z-50 border-b-2 border-ink bg-paper-raised transition-shadow duration-200 ${
+        scrolled ? 'shadow-[0_2px_0_0_#0A0A0A]' : ''
       }`}
     >
-      <div className="section-shell flex h-16 items-center justify-between sm:h-20">
-        {/* Logo */}
-        <button
-          onClick={() => onNavigate('landing')}
-          className="group flex items-center gap-3 text-left"
-          aria-label="PyroGuard AI home"
-        >
-          <span className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-accent-500 to-indigo-600 shadow-glow transition-transform duration-300 group-hover:scale-105">
+      <div className="section-shell flex h-16 items-center justify-between gap-4">
+        {/* Drawing stamp */}
+        <button onClick={() => onNavigate('landing')} className="group flex items-center gap-3">
+          <span className="flex h-9 w-9 items-center justify-center border-2 border-ink bg-signal transition-transform duration-150 group-hover:-translate-y-0.5">
             <Flame className="h-5 w-5 text-white" />
           </span>
-          <span className="leading-tight">
-            <span className="block text-lg font-extrabold tracking-tight text-white">
-              Pyro<span className="text-accent-400">Guard</span>
+          <span className="text-left leading-none">
+            <span className="block font-display text-lg font-extrabold uppercase tracking-tight text-ink">
+              Pyro<span className="text-signal">Guard</span>
             </span>
-            <span className="hidden text-[11px] font-medium tracking-wide text-slate-400 sm:block">
-              Thermal Intelligence Platform
+            <span className="mt-1 hidden font-mono text-[9px] uppercase tracking-[0.16em] text-ink-muted sm:block">
+              Thermal intelligence platform
             </span>
           </span>
         </button>
 
-        {/* Desktop nav */}
-        <nav className="hidden items-center gap-1 lg:flex">
+        {/* Sheet index */}
+        <nav className="hidden items-center lg:flex">
           {NAV_LINKS.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-300 transition-all duration-300 hover:bg-white/5 hover:text-white"
+              className="group flex items-center gap-1.5 border-l border-ink/15 px-4 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-ink-muted transition-colors duration-150 hover:text-signal"
             >
+              <span className="text-[9px] text-ink-faint group-hover:text-signal">{link.no}</span>
               {link.label}
             </a>
           ))}
         </nav>
 
-        {/* Desktop CTA */}
-        <div className="hidden items-center gap-3 lg:flex">
-          <button
-            onClick={() => onNavigate('login')}
-            className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-300 transition-colors duration-300 hover:text-white"
-          >
+        <div className="hidden items-center gap-2 lg:flex">
+          <button onClick={() => onNavigate('login')} className="btn-ghost">
             Sign in
           </button>
-          <button
-            onClick={() => onNavigate('dashboard')}
-            className="inline-flex items-center gap-2 rounded-xl bg-accent-500 px-5 py-2.5 text-sm font-bold text-white shadow-glow transition-all duration-300 hover:-translate-y-0.5 hover:bg-accent-400 hover:shadow-glow-lg"
-          >
-            Launch Console
-            <ArrowRight className="h-4 w-4" />
+          <button onClick={() => onNavigate('dashboard')} className="btn-primary">
+            Launch console
+            <ArrowRight className="h-3.5 w-3.5" />
           </button>
         </div>
 
-        {/* Mobile toggle */}
         <button
-          onClick={() => setMenuOpen((open) => !open)}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-slate-200 transition-colors duration-300 hover:bg-white/10 lg:hidden"
+          onClick={() => setMenuOpen((o) => !o)}
+          className="btn-icon lg:hidden"
           aria-expanded={menuOpen}
           aria-label="Toggle navigation menu"
         >
-          {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
         </button>
       </div>
 
-      {/* Mobile menu */}
       {menuOpen && (
-        <div className="border-t border-white/10 bg-[#090D16]/95 backdrop-blur-xl lg:hidden">
-          <nav className="section-shell flex flex-col gap-1 py-4">
+        <div className="border-t-2 border-ink bg-paper-raised lg:hidden">
+          <nav className="section-shell flex flex-col py-3">
             {NAV_LINKS.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
                 onClick={() => setMenuOpen(false)}
-                className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-300 transition-colors duration-300 hover:bg-white/5 hover:text-white"
+                className="flex items-center gap-2 border-b border-ink/10 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-ink"
               >
+                <span className="text-[9px] text-ink-faint">{link.no}</span>
                 {link.label}
               </a>
             ))}
-            <div className="mt-2 flex flex-col gap-2">
+            <div className="mt-3 flex flex-col gap-2">
               <button
                 onClick={() => {
                   setMenuOpen(false);
                   onNavigate('login');
                 }}
-                className="btn-ghost w-full"
+                className="btn-secondary w-full"
               >
                 Sign in
               </button>
@@ -123,13 +110,15 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate }) => {
                 }}
                 className="btn-primary w-full"
               >
-                Launch Console
-                <ArrowRight className="h-4 w-4" />
+                Launch console
+                <ArrowRight className="h-3.5 w-3.5" />
               </button>
             </div>
           </nav>
         </div>
       )}
+
+      <div className="ruler-x" />
     </header>
   );
 };

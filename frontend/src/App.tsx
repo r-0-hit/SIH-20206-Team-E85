@@ -100,7 +100,7 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#090D16] text-slate-50">
+    <div className="flex min-h-screen flex-col bg-paper text-ink">
       {/* Top Navbar */}
       <Navbar
         currentUser={currentUser}

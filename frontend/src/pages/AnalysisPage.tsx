@@ -13,6 +13,9 @@ import {
 } from 'lucide-react';
 import { detectionService } from '../services/detectionService';
 import { Detection } from '../types/index';
+import { PageHeader } from '../components/ui/PageHeader';
+import { Sheet, SheetHead } from '../components/ui/Sheet';
+import { TitleBlock } from '../components/ui/TitleBlock';
 
 interface AnalysisPageProps {
   onAnalysisComplete: (newDetection: Detection) => void;
@@ -59,7 +62,10 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({ onAnalysisComplete, 
         riskScore: parsedFrp > 100 ? 95 : 85,
       });
 
-      setSuccessMsg(res.message || `Telegram emergency alert dispatched for coordinates [${parsedLat}, ${parsedLon}]!`);
+      setSuccessMsg(
+        res.message ||
+          `Telegram emergency alert dispatched for coordinates [${parsedLat}, ${parsedLon}]!`
+      );
     } catch (err: any) {
       setError(err.message || 'Failed to dispatch manual Telegram alert.');
     } finally {
@@ -73,35 +79,35 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({ onAnalysisComplete, 
       label: 'Jamnagar Refinery Tank Fire',
       desc: 'Severe accidental industrial explosion',
       category: 'Accidental Fire',
-      badgeColor: 'border-red-500/50 bg-red-950/40 text-red-300',
+      badgeColor: 'tag-danger',
       data: { lat: '22.3619', lon: '69.8318', brightness: '475.0', frp: '420.0', daynight: 'N', confidence: 'high' },
     },
     {
       label: 'Panipat Operational Flare',
       desc: 'Routine industrial flaring emission',
       category: 'Persistent Source',
-      badgeColor: 'border-purple-500/50 bg-purple-950/40 text-purple-300',
+      badgeColor: 'tag-blueprint',
       data: { lat: '29.3941', lon: '76.8833', brightness: '358.0', frp: '42.5', daynight: 'N', confidence: 'nominal' },
     },
     {
       label: 'Simlipal Forest Wildfire',
       desc: 'Remote vegetative biomass fire front',
       category: 'Wildfire',
-      badgeColor: 'border-orange-500/50 bg-orange-950/40 text-orange-300',
+      badgeColor: 'tag-signal',
       data: { lat: '21.7512', lon: '86.3325', brightness: '388.0', frp: '98.0', daynight: 'D', confidence: 'high' },
     },
     {
       label: 'Punjab Stubble Burning',
       desc: 'Seasonal agricultural parcel fire',
       category: 'Agricultural',
-      badgeColor: 'border-amber-500/50 bg-amber-950/40 text-amber-300',
+      badgeColor: 'tag-warn',
       data: { lat: '30.3712', lon: '76.7745', brightness: '335.0', frp: '26.0', daynight: 'D', confidence: 'nominal' },
     },
     {
       label: 'Jharia Coalfield Seam Fire',
       desc: 'Subterranean mining combustion',
       category: 'Mining',
-      badgeColor: 'border-slate-500/50 bg-slate-800/60 text-slate-300',
+      badgeColor: 'tag-ink',
       data: { lat: '23.7431', lon: '86.4175', brightness: '396.0', frp: '82.0', daynight: 'N', confidence: 'high' },
     },
   ];
@@ -173,68 +179,64 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({ onAnalysisComplete, 
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-8">
-      <div>
-        <h1 className="text-2xl lg:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-          <Flame className="w-7 h-7 text-rose-500" />
-          <span>Thermal Analysis & Satellite Ingestion Studio</span>
-        </h1>
-        <p className="text-xs text-slate-400 mt-1">
-          Submit thermal coordinates for real-time AI classification or ingest live NASA FIRMS satellite swaths.
-        </p>
-      </div>
+    <div className="page-shell space-y-6">
+      <PageHeader
+        sheet="DWG 04"
+        title="Thermal Analysis & Ingestion Studio"
+        description="Submit thermal coordinates for real-time AI classification, or ingest live NASA FIRMS satellite swaths."
+      />
 
       {error && (
-        <div className="p-4 rounded-xl bg-red-950/80 border border-red-800 text-red-300 text-xs flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 shrink-0 text-red-400" />
+        <div className="flex items-center gap-3 border-2 border-risk-critical bg-[#FDECE8] px-4 py-3 font-mono text-[11px] uppercase tracking-wider text-risk-critical">
+          <AlertCircle className="h-4 w-4 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {successMsg && (
-        <div className="p-4 rounded-xl bg-emerald-950/80 border border-emerald-800 text-emerald-300 text-xs flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400" />
-            <span>{successMsg}</span>
-          </div>
-          <button
-            onClick={() => onNavigate('map')}
-            className="px-3 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition"
-          >
-            View on GIS Map
+        <div className="flex flex-wrap items-center justify-between gap-3 border-2 border-risk-low bg-[#EAF5EF] px-4 py-3 font-mono text-[11px] uppercase tracking-wider text-risk-low">
+          <span className="flex items-center gap-2.5">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            {successMsg}
+          </span>
+          <button onClick={() => onNavigate('map')} className="btn-secondary btn-sm">
+            View on GIS map
           </button>
         </div>
       )}
 
-      {/* Telegram Alerts Status Banner */}
-      <div className="p-4 rounded-2xl bg-sky-950/40 border border-sky-800/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-sky-500/20 border border-sky-500/40 flex items-center justify-center text-sky-400 shrink-0">
-            <Send className="w-4 h-4" />
-          </div>
+      {/* Telegram alert channel status */}
+      <div className="sheet shadow-hard-sm flex flex-col items-start justify-between gap-3 p-4 sm:flex-row sm:items-center">
+        <div className="flex items-start gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center border-2 border-ink bg-blueprint">
+            <Send className="h-4 w-4 text-white" />
+          </span>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-sky-200">Telegram Alert Channel Active (@pyroguard_alerts_soham_bot)</span>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-display text-xs font-extrabold uppercase tracking-tight text-ink">
+                Telegram alert channel active
+              </span>
+              <span className="val">(@pyroguard_alerts_soham_bot)</span>
+              <span className="h-1.5 w-1.5 animate-blink bg-risk-low" />
             </div>
-            <p className="text-slate-300 text-[11px] mt-0.5">
-              Refineries (Jamnagar, Panipat) continuous flaring is suppressed. Alerts are sent <strong>automatically on sudden thermal spikes</strong> or <strong>manually via the button below</strong>.
+            <p className="mt-1 text-[11px] leading-relaxed text-ink-soft">
+              Continuous refinery flaring (Jamnagar, Panipat) is suppressed. Alerts dispatch{' '}
+              <strong>automatically on sudden thermal spikes</strong>, or{' '}
+              <strong>manually via the button below</strong>.
             </p>
           </div>
         </div>
-        <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold text-[10px] font-mono shrink-0">
-          ● REAL-TIME DISPATCH READY
-        </span>
+        <span className="tag-ok shrink-0">● REAL-TIME DISPATCH READY</span>
       </div>
 
       {/* Scenario Presets Bar */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-            <Sparkles className="w-4 h-4 text-amber-400" />
-            <span>Benchmark Scenario Presets (Click to Load)</span>
+          <h2 className="panel-title">
+            <Sparkles className="h-4 w-4 text-signal" />
+            Benchmark scenario presets
           </h2>
-          <span className="text-[11px] text-slate-400">Validated against ground-truth incidents</span>
+          <span className="annotation">Validated against ground-truth incidents</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
@@ -243,18 +245,18 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({ onAnalysisComplete, 
               key={idx}
               type="button"
               onClick={() => applyPreset(p.data)}
-              className="glass-panel p-3 rounded-xl border border-slate-800 hover:border-slate-600 transition text-left space-y-1.5 group hover:scale-[1.02]"
+              className="sheet sheet-hover shadow-hard-sm group space-y-2 p-3 text-left"
             >
-              <div className="flex items-center justify-between">
-                <span className={`px-2 py-0.5 rounded text-[9px] font-bold border ${p.badgeColor}`}>
-                  {p.category}
+              <div className="flex items-center justify-between gap-2">
+                <span className={p.badgeColor}>{p.category}</span>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-ink-faint group-hover:text-signal">
+                  Apply
                 </span>
-                <span className="text-[10px] font-mono text-slate-400 group-hover:text-blue-400">Apply</span>
               </div>
-              <h3 className="text-xs font-bold text-slate-200 group-hover:text-white leading-tight">
+              <h3 className="font-display text-xs font-extrabold uppercase leading-tight text-ink">
                 {p.label}
               </h3>
-              <p className="text-[10px] text-slate-400 line-clamp-2">{p.desc}</p>
+              <p className="text-[10px] leading-relaxed text-ink-muted">{p.desc}</p>
             </button>
           ))}
         </div>
@@ -263,21 +265,17 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({ onAnalysisComplete, 
       {/* Main Form & FIRMS Swath Ingest Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left 2 Cols: Coordinate Input Form */}
-        <div className="lg:col-span-2 glass-panel p-6 rounded-2xl border border-slate-800 space-y-5">
-          <div className="border-b border-slate-800 pb-3">
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <Compass className="w-4 h-4 text-blue-400" />
-              <span>Thermal Observation Parameters</span>
-            </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Enter satellite radiometric parameters or ground telemetry for AI classification.
-            </p>
-          </div>
+        <Sheet className="p-0 lg:col-span-2">
+          <SheetHead
+            title="Thermal observation parameters"
+            icon={<Compass className="h-4 w-4 text-blueprint" />}
+            meta="Radiometric input"
+          />
 
-          <form onSubmit={handleAnalyzeSubmit} className="space-y-4">
+          <form onSubmit={handleAnalyzeSubmit} className="space-y-4 p-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="label">
                   Latitude (Decimal Degrees)
                 </label>
                 <input
@@ -287,12 +285,12 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({ onAnalysisComplete, 
                   onChange={(e) => setLat(e.target.value)}
                   placeholder="e.g. 22.3619"
                   required
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono focus:outline-none focus:border-blue-500"
+                  className="input"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="label">
                   Longitude (Decimal Degrees)
                 </label>
                 <input
@@ -302,14 +300,14 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({ onAnalysisComplete, 
                   onChange={(e) => setLon(e.target.value)}
                   placeholder="e.g. 69.8318"
                   required
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono focus:outline-none focus:border-blue-500"
+                  className="input"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="label">
                   Brightness Temperature (Kelvin)
                 </label>
                 <input
@@ -319,12 +317,12 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({ onAnalysisComplete, 
                   onChange={(e) => setBrightness(e.target.value)}
                   placeholder="300 - 550 K"
                   required
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono focus:outline-none focus:border-blue-500"
+                  className="input"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="label">
                   Fire Radiative Power (FRP in Megawatts)
                 </label>
                 <input
@@ -334,20 +332,20 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({ onAnalysisComplete, 
                   onChange={(e) => setFrp(e.target.value)}
                   placeholder="e.g. 350.0 MW"
                   required
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono focus:outline-none focus:border-blue-500"
+                  className="input"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="label">
                   Satellite Instrument
                 </label>
                 <select
                   value={satellite}
                   onChange={(e) => setSatellite(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
+                  className="select"
                 >
                   <option value="VIIRS-SNPP">VIIRS (Suomi-NPP 375m)</option>
                   <option value="VIIRS-NOAA20">VIIRS (NOAA-20 375m)</option>
@@ -358,13 +356,13 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({ onAnalysisComplete, 
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="label">
                   Overpass Time
                 </label>
                 <select
                   value={daynight}
                   onChange={(e) => setDaynight(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
+                  className="select"
                 >
                   <option value="N">Night Swath (Zero Solar Glint)</option>
                   <option value="D">Daytime Swath</option>
@@ -372,13 +370,13 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({ onAnalysisComplete, 
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="label">
                   Sensor Confidence
                 </label>
                 <select
                   value={confidence}
                   onChange={(e) => setConfidence(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
+                  className="select"
                 >
                   <option value="high">High (&gt;80%)</option>
                   <option value="nominal">Nominal (50-80%)</option>
@@ -387,52 +385,45 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({ onAnalysisComplete, 
               </div>
             </div>
 
-            <div className="pt-2 flex flex-col sm:flex-row gap-3">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-bold text-xs transition shadow-lg shadow-rose-600/30 flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                <Zap className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                <span>{loading ? 'Executing AI Inference & GIS Query...' : 'Run Real-Time AI Classification'}</span>
+            <div className="flex flex-col gap-3 border-t-2 border-ink pt-4 sm:flex-row">
+              <button type="submit" disabled={loading} className="btn-primary flex-1 py-3">
+                <Zap className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                {loading ? 'Executing AI inference…' : 'Run real-time AI classification'}
               </button>
-
               <button
                 type="button"
                 onClick={handleManualTelegramAlert}
                 disabled={manualAlerting}
-                className="py-3 px-5 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs transition shadow-lg shadow-sky-600/30 flex items-center justify-center gap-2 disabled:opacity-50"
-                title="Immediately broadcast an emergency alert to Telegram for these exact coordinates"
+                className="btn-blueprint py-3"
+                title="Dispatch a Telegram emergency alert for these coordinates"
               >
-                <Send className={`w-4 h-4 ${manualAlerting ? 'animate-spin' : ''}`} />
-                <span>{manualAlerting ? 'Alerting...' : '📢 Send Telegram Alert'}</span>
+                <Send className={`h-4 w-4 ${manualAlerting ? 'animate-spin' : ''}`} />
+                {manualAlerting ? 'Sending…' : 'Send Telegram alert'}
               </button>
             </div>
           </form>
-        </div>
+        </Sheet>
 
         {/* Right 1 Col: NASA FIRMS Swath Ingest */}
         <div className="space-y-6">
-          <div className="glass-panel p-6 rounded-2xl border border-blue-900/50 space-y-4 bg-gradient-to-b from-blue-950/30 to-slate-900">
-            <div className="border-b border-slate-800 pb-3">
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <Satellite className="w-4 h-4 text-blue-400" />
-                <span>NASA FIRMS Live Ingestion</span>
-              </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
+          <Sheet className="p-0" tab>
+            <SheetHead
+              title="NASA FIRMS live ingestion"
+              icon={<Satellite className="h-4 w-4 text-blueprint" />}
+            />
+
+            <div className="space-y-3 p-5">
+              <p className="text-[11px] leading-relaxed text-ink-soft">
                 Bulk ingest and classify current orbital satellite swaths.
               </p>
-            </div>
-
-            <div className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="label">
                   Target Geographic Region
                 </label>
                 <select
                   value={swathRegion}
                   onChange={(e) => setSwathRegion(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
+                  className="select"
                 >
                   <option value="South Asia">South Asia / India Industrial Belt</option>
                   <option value="Middle East">Middle East Flare Complexes</option>
@@ -446,29 +437,32 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({ onAnalysisComplete, 
                 type="button"
                 onClick={handleIngestSwath}
                 disabled={swathLoading}
-                className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                className="btn-blueprint w-full"
               >
-                <Satellite className={`w-4 h-4 ${swathLoading ? 'animate-spin' : ''}`} />
-                <span>{swathLoading ? 'Ingesting NASA Swath...' : 'Ingest & Classify Swath'}</span>
+                <Satellite className={`h-4 w-4 ${swathLoading ? 'animate-spin' : ''}`} />
+                {swathLoading ? 'Ingesting swath…' : 'Ingest & classify swath'}
               </button>
             </div>
-          </div>
+          </Sheet>
 
           {/* Batch File Upload Note */}
-          <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-2.5">
-            <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-              <Upload className="w-4 h-4 text-purple-400" />
-              Batch CSV / GeoJSON Upload
+          <Sheet className="space-y-2.5 p-5" framed>
+            <h3 className="key flex items-center gap-1.5">
+              <Upload className="h-3.5 w-3.5 text-signal" />
+              Batch CSV / GeoJSON upload
             </h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Have historical NASA FIRMS CSV dumps or GIS shapefiles? Batch upload and automated model inference available via the REST API endpoint:
+            <p className="text-[11px] leading-relaxed text-ink-soft">
+              Historical NASA FIRMS CSV dumps and GIS shapefiles can be batch-scored through the REST
+              endpoint:
             </p>
-            <div className="p-2 rounded bg-slate-900/90 font-mono text-[11px] text-blue-300 border border-slate-800">
+            <code className="block border-2 border-ink bg-paper-sunk px-2.5 py-1.5 font-mono text-[11px] text-blueprint">
               POST /api/detections/analyze
-            </div>
-          </div>
+            </code>
+          </Sheet>
         </div>
       </div>
+
+      <TitleBlock sheetNo="04" view="Thermal analysis studio" />
     </div>
   );
 };

@@ -18,7 +18,7 @@ const COLUMNS: { heading: string; links: { label: string; page?: string; href?: 
   {
     heading: 'Intelligence',
     links: [
-      { label: 'Detection history', page: 'history' },
+      { label: 'Detection registry', page: 'history' },
       { label: 'Analytics & trends', page: 'analytics' },
       { label: 'Capabilities', href: '#capabilities' },
       { label: 'Deployment', href: '#deployment' },
@@ -44,27 +44,26 @@ const SOCIALS = [
 
 export const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => {
   const linkClass =
-    'text-sm text-slate-400 transition-colors duration-300 hover:text-white';
+    'font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors duration-150 hover:text-signal';
 
   return (
-    <footer className="border-t border-white/10 bg-[#070A11]">
-      <div className="section-shell py-14 sm:py-16">
-        <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:grid-cols-5">
-          {/* Brand column */}
+    <footer className="bg-paper-raised">
+      <div className="section-shell py-12">
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5">
           <div className="col-span-2">
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-accent-500 to-indigo-600 shadow-glow">
+              <span className="flex h-9 w-9 items-center justify-center border-2 border-ink bg-signal">
                 <Flame className="h-5 w-5 text-white" />
               </span>
-              <span className="text-lg font-extrabold tracking-tight text-white">
-                Pyro<span className="text-accent-400">Guard</span>
+              <span className="font-display text-lg font-extrabold uppercase tracking-tight text-ink">
+                Pyro<span className="text-signal">Guard</span>
               </span>
             </div>
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-400">
-              Satellite thermal intelligence for industrial fire detection, persistent
-              source monitoring and critical infrastructure protection.
+            <p className="mt-4 max-w-xs text-[12px] leading-relaxed text-ink-soft">
+              Satellite thermal intelligence for industrial fire detection, persistent source
+              monitoring and critical infrastructure protection.
             </p>
-            <div className="mt-6 flex items-center gap-3">
+            <div className="mt-5 flex items-center gap-2">
               {SOCIALS.map((social) => {
                 const Icon = social.icon;
                 return (
@@ -72,9 +71,9 @@ export const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => {
                     key={social.label}
                     href={social.href}
                     aria-label={social.label}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-slate-400 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent-500/40 hover:text-accent-300"
+                    className="flex h-8 w-8 items-center justify-center border-2 border-ink bg-paper-raised text-ink transition-colors duration-150 hover:bg-signal hover:text-white"
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className="h-3.5 w-3.5" />
                   </a>
                 );
               })}
@@ -83,10 +82,10 @@ export const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => {
 
           {COLUMNS.map((column) => (
             <div key={column.heading}>
-              <h4 className="text-xs font-bold uppercase tracking-[0.14em] text-slate-200">
+              <h4 className="border-b-2 border-ink pb-2 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-ink">
                 {column.heading}
               </h4>
-              <ul className="mt-4 space-y-3">
+              <ul className="mt-3 space-y-2.5">
                 {column.links.map((link) => (
                   <li key={link.label}>
                     {link.page ? (
@@ -104,24 +103,29 @@ export const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => {
             </div>
           ))}
         </div>
+      </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 sm:flex-row">
-          <p className="text-xs text-slate-500">
-            © {new Date().getFullYear()} PyroGuard AI · Smart India Hackathon 2026 · Team E85
-          </p>
-          <div className="flex items-center gap-6">
-            <a href="#platform" className="text-xs text-slate-500 transition-colors duration-300 hover:text-slate-300">
-              Privacy
-            </a>
-            <a href="#platform" className="text-xs text-slate-500 transition-colors duration-300 hover:text-slate-300">
-              Terms
-            </a>
-            <span className="inline-flex items-center gap-2 text-xs text-slate-500">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              All systems operational
-            </span>
-          </div>
-        </div>
+      {/* Drawing title block */}
+      <div className="title-block border-t-2">
+        <span>
+          PROJECT: <strong>PYROGUARD AI</strong>
+        </span>
+        <span className="hidden sm:inline text-ink/25">|</span>
+        <span>
+          TEAM: <strong>E85</strong>
+        </span>
+        <span className="hidden sm:inline text-ink/25">|</span>
+        <span>
+          EVENT: <strong>SMART INDIA HACKATHON 2026</strong>
+        </span>
+        <span className="hidden md:inline text-ink/25">|</span>
+        <span className="hidden md:inline">
+          © <strong>{new Date().getFullYear()}</strong>
+        </span>
+        <span className="ml-auto flex items-center gap-1.5">
+          <span className="h-1.5 w-1.5 bg-risk-low" />
+          <strong>ALL SYSTEMS OPERATIONAL</strong>
+        </span>
       </div>
     </footer>
   );

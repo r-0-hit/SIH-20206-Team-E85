@@ -19,72 +19,81 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, currentUser }) => {
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'map', label: 'GIS Map Explorer', icon: MapPin },
-    { id: 'prediction', label: 'What-If Simulator', icon: Compass },
-    { id: 'analyze', label: 'AI Thermal Analysis', icon: Flame },
-    { id: 'history', label: 'Detection History', icon: History },
-    { id: 'analytics', label: 'Analytics & Trends', icon: BarChart3 },
-    { id: 'landing', label: 'System Overview', icon: FileText },
+    { id: 'dashboard', sheet: '01', label: 'Overview', icon: LayoutDashboard },
+    { id: 'map', sheet: '02', label: 'GIS Map Explorer', icon: MapPin },
+    { id: 'prediction', sheet: '03', label: 'What-If Simulator', icon: Compass },
+    { id: 'analyze', sheet: '04', label: 'Thermal Analysis', icon: Flame },
+    { id: 'history', sheet: '05', label: 'Detection Registry', icon: History },
+    { id: 'analytics', sheet: '06', label: 'Analytics & Trends', icon: BarChart3 },
+    { id: 'landing', sheet: '00', label: 'System Overview', icon: FileText },
   ];
 
   if (currentUser?.role === 'ADMIN') {
-    navItems.push({ id: 'admin', label: 'Admin Console', icon: ShieldCheck });
+    navItems.push({ id: 'admin', sheet: '07', label: 'Admin Console', icon: ShieldCheck });
   }
 
   return (
-    <aside className="flex w-full shrink-0 justify-between border-b border-white/10 bg-[#0B111C]/80 p-3 backdrop-blur-xl lg:w-64 lg:flex-col lg:border-b-0 lg:border-r lg:p-4">
-      <div className="space-y-1 w-full flex lg:flex-col overflow-x-auto lg:overflow-visible gap-1 lg:gap-1.5 pb-2 lg:pb-0">
-        <div className="hidden lg:block px-3 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-          Intelligence Console
-        </div>
-
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activePage === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => onNavigate(item.id)}
-              className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-300 w-auto lg:w-full text-left ${
-                isActive
-                  ? 'border border-accent-400/30 bg-accent-500/90 text-white shadow-glow'
-                  : 'border border-transparent text-slate-400 hover:bg-white/5 hover:text-slate-100'
-              }`}
-            >
-              <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Sensor Status Footer */}
-      <div className="hidden lg:block pt-4 border-t border-slate-800/60 text-xs">
-        <div className="glass-panel p-3 rounded-xl space-y-2 text-[11px]">
-          <div className="flex items-center justify-between">
-            <span className="text-slate-400">Satellite Feeds:</span>
-            <span className="text-emerald-400 font-mono font-bold flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              ONLINE
-            </span>
+    <aside className="w-full shrink-0 border-b-2 border-ink bg-paper-raised lg:w-60 lg:border-b-0 lg:border-r-2">
+      <div className="flex h-full flex-col justify-between">
+        <nav className="flex gap-1 overflow-x-auto p-2 lg:flex-col lg:overflow-visible lg:p-3">
+          <div className="hidden px-2 pb-2 pt-1 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-ink-muted lg:block">
+            Drawing Index
           </div>
-          <div className="text-slate-400 space-y-1">
-            <div className="flex justify-between">
-              <span>VIIRS S-NPP:</span>
-              <span className="font-mono text-slate-300">375m Res</span>
+
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activePage === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => onNavigate(item.id)}
+                className={`group flex w-auto shrink-0 items-center gap-2.5 border-2 px-3 py-2 text-left font-mono text-[11px] font-bold uppercase tracking-wider transition-all duration-150 lg:w-full ${
+                  isActive
+                    ? 'border-ink bg-ink text-paper-raised'
+                    : 'border-transparent text-ink-muted hover:border-ink hover:bg-signal-soft hover:text-ink'
+                }`}
+              >
+                <span
+                  className={`hidden font-mono text-[10px] lg:inline ${
+                    isActive ? 'text-signal' : 'text-ink-faint group-hover:text-signal'
+                  }`}
+                >
+                  {item.sheet}
+                </span>
+                <Icon className="h-3.5 w-3.5 shrink-0" />
+                <span className="whitespace-nowrap">{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Instrument status block */}
+        <div className="hidden border-t-2 border-ink p-3 lg:block">
+          <div className="border-2 border-ink bg-paper p-3">
+            <div className="mb-2 flex items-center justify-between border-b border-ink/20 pb-1.5">
+              <span className="key">Feeds</span>
+              <span className="flex items-center gap-1.5 font-mono text-[10px] font-bold text-risk-low">
+                <span className="h-1.5 w-1.5 bg-risk-low" />
+                ONLINE
+              </span>
             </div>
-            <div className="flex justify-between">
-              <span>MODIS Aqua:</span>
-              <span className="font-mono text-slate-300">1km Res</span>
-            </div>
-          </div>
-          <div className="pt-1 text-[10px] text-slate-400 border-t border-slate-800">
-            OpenStreetMap Industrial DB Linked
+            <dl className="space-y-1 font-mono text-[10px] uppercase text-ink-muted">
+              <div className="flex justify-between">
+                <dt>VIIRS S-NPP</dt>
+                <dd className="font-bold text-ink">375 M</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt>MODIS Aqua</dt>
+                <dd className="font-bold text-ink">1 KM</dd>
+              </div>
+              <div className="flex justify-between border-t border-ink/20 pt-1">
+                <dt>OSM Registry</dt>
+                <dd className="font-bold text-ink">LINKED</dd>
+              </div>
+            </dl>
           </div>
         </div>
       </div>
     </aside>
   );
 };
-

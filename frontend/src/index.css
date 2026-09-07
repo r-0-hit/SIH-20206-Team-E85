@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   PYROGUARD AI — TECHNICAL BLUEPRINT DESIGN SYSTEM
+   Ground  : drafting paper #F3F3F1 with an engineering grid
+   Ink     : #0A0A0A linework, #6E6E6E annotations
+   Accent  : vermilion #F74B00 (action) · blueprint blue #1438AA (data)
+   Type    : Archivo 800/900 headings · Inter prose · Roboto Mono annotations
+   Motifs  : double frames, corner registration ticks, rulers, title blocks
+   ───────────────────────────────────────────────────────────────────────────── */
+
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -9,80 +18,310 @@
   }
 
   body {
-    background-color: #090d16;
-    color: #f8fafc;
-    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: theme('colors.paper.DEFAULT');
+    background-image: theme('backgroundImage.grid-fine');
+    background-size: 8px 8px;
+    color: theme('colors.ink.DEFAULT');
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
   }
 
   h1, h2, h3, h4 {
-    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+    font-family: 'Archivo', 'Inter', system-ui, sans-serif;
+    font-weight: 800;
     letter-spacing: -0.02em;
   }
 
+  /* Every figure on a drawing aligns on its digits */
+  .font-mono, table, input[type='number'] {
+    font-variant-numeric: tabular-nums;
+  }
+
   ::selection {
-    background-color: rgba(59, 130, 246, 0.35);
-    color: #f8fafc;
+    background-color: #F74B00;
+    color: #fff;
   }
 
   :focus-visible {
-    outline: 2px solid #3b82f6;
+    outline: 2px solid theme('colors.signal.DEFAULT');
     outline-offset: 2px;
-    border-radius: 0.5rem;
   }
 }
 
 @layer components {
-  /* Glassmorphic surfaces */
-  .glass-panel {
-    background: rgba(15, 23, 42, 0.65);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+  /* ── Sheets & panels ─────────────────────────────────────────────────────── */
+  .sheet {
+    @apply relative border-2 border-ink bg-paper-raised;
   }
 
-  .glass-panel-elevated {
-    background: rgba(30, 41, 59, 0.75);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+  /* The double-line drafting frame: an inner hairline offset from the border */
+  .sheet-framed::before {
+    content: '';
+    @apply pointer-events-none absolute inset-[5px] border border-ink/15;
   }
 
-  /* Marketing surface used across the single-page site */
-  .glass-card {
-    @apply relative rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-md transition-all duration-300;
+  .sheet-hover {
+    @apply transition-all duration-200;
   }
 
-  .glass-card:hover {
-    @apply border-accent-500/40 bg-white/[0.05] -translate-y-1;
-    box-shadow: 0 0 40px -12px rgba(59, 130, 246, 0.45);
+  .sheet-hover:hover {
+    @apply -translate-x-0.5 -translate-y-0.5 border-signal;
+    box-shadow: 4px 4px 0 0 #F74B00;
+  }
+
+  /* Corner registration ticks, drawn with two gradients per corner */
+  .ticks::after {
+    content: '';
+    @apply pointer-events-none absolute inset-0;
+    background-image:
+      linear-gradient(#0A0A0A, #0A0A0A), linear-gradient(#0A0A0A, #0A0A0A),
+      linear-gradient(#0A0A0A, #0A0A0A), linear-gradient(#0A0A0A, #0A0A0A),
+      linear-gradient(#0A0A0A, #0A0A0A), linear-gradient(#0A0A0A, #0A0A0A),
+      linear-gradient(#0A0A0A, #0A0A0A), linear-gradient(#0A0A0A, #0A0A0A);
+    background-repeat: no-repeat;
+    background-size:
+      10px 2px, 2px 10px, 10px 2px, 2px 10px,
+      10px 2px, 2px 10px, 10px 2px, 2px 10px;
+    background-position:
+      8px 8px, 8px 8px, calc(100% - 8px) 8px, calc(100% - 8px) 8px,
+      8px calc(100% - 8px), 8px calc(100% - 8px),
+      calc(100% - 8px) calc(100% - 8px), calc(100% - 8px) calc(100% - 8px);
+    opacity: 0.35;
+  }
+
+  /* A small vermilion index tab on the top-right of a sheet */
+  .tab-signal::before {
+    content: '';
+    @apply absolute right-0 top-0 h-1.5 w-12 bg-signal;
+  }
+
+  .panel-head {
+    @apply flex flex-wrap items-center justify-between gap-3 border-b-2 border-ink px-4 py-3;
+  }
+
+  .panel-title {
+    @apply flex items-center gap-2 font-display text-sm font-extrabold uppercase tracking-tight text-ink;
+  }
+
+  /* ── Typography ──────────────────────────────────────────────────────────── */
+  .rule-title {
+    @apply font-display text-2xl font-extrabold uppercase leading-none tracking-tight text-ink sm:text-3xl;
+  }
+
+  /* Heavy title underscored by a thick rule, as on every deck slide */
+  .rule-underline {
+    @apply border-b-4 border-ink pb-2;
+  }
+
+  .annotation {
+    @apply font-mono text-[11px] uppercase tracking-[0.12em] text-ink-muted;
+  }
+
+  /* KEY: value annotation pairs */
+  .key {
+    @apply font-mono text-[11px] font-bold uppercase tracking-wider text-ink;
+  }
+
+  .val {
+    @apply font-mono text-[11px] uppercase tracking-wider text-ink-muted;
+  }
+
+  .callout {
+    @apply relative border-2 border-ink bg-paper-raised px-4 py-3 font-mono text-xs uppercase tracking-wide text-ink;
+  }
+
+  /* ── Controls ────────────────────────────────────────────────────────────── */
+  .btn {
+    @apply inline-flex select-none items-center justify-center gap-2 border-2 px-4 py-2 font-mono text-[11px]
+           font-bold uppercase tracking-[0.1em] transition-all duration-150
+           disabled:pointer-events-none disabled:opacity-40;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3.5 text-sm font-bold text-white
-           transition-all duration-300 hover:-translate-y-0.5 hover:bg-accent-400 hover:shadow-glow-lg
-           focus-visible:outline-none;
-    box-shadow: 0 0 40px -12px rgba(59, 130, 246, 0.45);
+    @apply btn border-ink bg-signal text-white shadow-hard-sm
+           hover:-translate-x-px hover:-translate-y-px hover:shadow-hard
+           active:translate-x-0 active:translate-y-0 active:shadow-none;
+  }
+
+  .btn-secondary {
+    @apply btn border-ink bg-paper-raised text-ink shadow-hard-sm
+           hover:-translate-x-px hover:-translate-y-px hover:shadow-hard
+           active:translate-x-0 active:translate-y-0 active:shadow-none;
+  }
+
+  .btn-blueprint {
+    @apply btn border-ink bg-blueprint text-white shadow-hard-sm
+           hover:-translate-x-px hover:-translate-y-px hover:shadow-hard
+           active:translate-x-0 active:translate-y-0 active:shadow-none;
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-6 py-3.5
-           text-sm font-bold text-slate-200 backdrop-blur-md transition-all duration-300
-           hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.08] hover:text-white;
+    @apply btn border-transparent text-ink-muted hover:border-ink hover:text-ink;
   }
 
-  .eyebrow {
-    @apply inline-flex items-center gap-2 rounded-full border border-accent-500/25 bg-accent-500/10 px-3.5 py-1.5
-           text-[11px] font-bold uppercase tracking-[0.14em] text-accent-300;
+  .btn-icon {
+    @apply inline-flex h-9 w-9 items-center justify-center border-2 border-ink bg-paper-raised text-ink
+           transition-all duration-150 hover:bg-ink hover:text-paper-raised
+           disabled:pointer-events-none disabled:opacity-40;
+  }
+
+  .btn-sm {
+    @apply px-2.5 py-1 text-[10px];
+  }
+
+  .label {
+    @apply mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted;
+  }
+
+  .input,
+  .select {
+    @apply w-full border-2 border-ink bg-paper-raised px-3 py-2 font-mono text-xs text-ink
+           transition-colors duration-150 placeholder:text-ink-faint placeholder:normal-case
+           focus:border-signal focus:outline-none;
+  }
+
+  .select {
+    @apply cursor-pointer appearance-none bg-[length:0.9rem] bg-[right_0.6rem_center] bg-no-repeat pr-8;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230A0A0A' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  }
+
+  /* ── Tags ────────────────────────────────────────────────────────────────── */
+  .tag {
+    @apply inline-flex items-center gap-1.5 border px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em];
+  }
+
+  .tag-ink {
+    @apply tag border-ink bg-paper-raised text-ink;
+  }
+
+  .tag-signal {
+    @apply tag border-signal bg-signal-soft text-signal-deep;
+  }
+
+  .tag-blueprint {
+    @apply tag border-blueprint bg-blueprint-soft text-blueprint;
+  }
+
+  .tag-solid {
+    @apply tag border-ink bg-ink text-paper-raised;
+  }
+
+  .tag-ok {
+    @apply tag border-risk-low bg-[#EAF5EF] text-risk-low;
+  }
+
+  .tag-warn {
+    @apply tag border-risk-moderate bg-[#FBF3E2] text-risk-moderate;
+  }
+
+  .tag-danger {
+    @apply tag border-risk-critical bg-[#FDECE8] text-risk-critical;
+  }
+
+  /* ── Data tables ─────────────────────────────────────────────────────────── */
+  .table-shell {
+    @apply w-full text-left text-xs;
+  }
+
+  .table-shell thead {
+    @apply border-b-2 border-ink bg-paper-sunk;
+  }
+
+  .table-shell th {
+    @apply px-3 py-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-ink;
+  }
+
+  .table-shell tbody tr {
+    @apply border-b border-ink/10 transition-colors duration-150 last:border-0 hover:bg-signal-soft;
+  }
+
+  .table-shell td {
+    @apply px-3 py-2.5 align-middle;
+  }
+
+  .th-sortable {
+    @apply cursor-pointer select-none transition-colors duration-150 hover:text-signal;
+  }
+
+  /* ── Drawing furniture ───────────────────────────────────────────────────── */
+  /* The title block that runs along the bottom of an engineering sheet */
+  .title-block {
+    @apply flex flex-wrap items-center gap-x-4 gap-y-1 border-t-2 border-ink bg-paper-raised px-4 py-2
+           font-mono text-[10px] uppercase tracking-[0.1em] text-ink-muted;
+  }
+
+  .title-block strong {
+    @apply font-bold text-ink;
+  }
+
+  /* Ruler edge with repeating measurement ticks */
+  .ruler-y {
+    background-image: repeating-linear-gradient(to bottom, #0A0A0A 0 1px, transparent 1px 12px);
+    @apply w-1.5 opacity-30;
+  }
+
+  .ruler-x {
+    background-image: repeating-linear-gradient(to right, #0A0A0A 0 1px, transparent 1px 12px);
+    @apply h-1.5 opacity-30;
+  }
+
+  .kpi {
+    @apply font-display text-3xl font-extrabold leading-none tracking-tight text-ink;
+  }
+
+  .page-shell {
+    @apply mx-auto w-full max-w-[90rem] px-4 py-6 sm:px-6 lg:px-8;
   }
 
   .section-shell {
-    @apply mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-10;
+    @apply mx-auto w-full max-w-[90rem] px-5 sm:px-8 lg:px-10;
+  }
+
+  .skeleton {
+    @apply relative overflow-hidden border border-ink/15 bg-paper-sunk;
+  }
+
+  .skeleton::after {
+    content: '';
+    @apply absolute inset-0;
+    background: linear-gradient(90deg, transparent, rgba(10, 10, 10, 0.06), transparent);
+    animation: shimmer 1.6s infinite;
+  }
+
+  /* Legacy aliases so un-migrated markup still reads as a paper sheet */
+  .glass-panel,
+  .glass-panel-elevated {
+    @apply sheet;
   }
 }
 
-/* Custom Pulsing Ripple Effect for Industrial Accidental Fires */
+/* Range inputs drawn as instrument sliders */
+.range-ink::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 18px;
+  background: #0A0A0A;
+  border: 2px solid #0A0A0A;
+  cursor: pointer;
+}
+
+.range-ink::-moz-range-thumb {
+  width: 14px;
+  height: 18px;
+  background: #0A0A0A;
+  border: 2px solid #0A0A0A;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Pulsing ripple for accidental industrial fires on the map */
 @keyframes pulse-ring {
   0% {
     transform: scale(0.6);
@@ -99,48 +338,99 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background-color: rgba(239, 68, 68, 0.6);
+  background-color: rgba(247, 75, 0, 0.55);
   animation: pulse-ring 1.8s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
 }
 
-/* Leaflet dark cartography adjustments */
+/* Leaflet, drafted on paper */
 .leaflet-container {
-  background: #090d16 !important;
-  font-family: inherit;
+  background: #EAE9E4 !important;
+  font-family: 'Roboto Mono', monospace;
 }
 
 .leaflet-popup-content-wrapper {
-  background: #0f172a !important;
-  color: #f8fafc !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  border-radius: 16px !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5) !important;
+  background: #FFFFFF !important;
+  color: #0A0A0A !important;
+  border: 2px solid #0A0A0A !important;
+  border-radius: 0 !important;
+  box-shadow: 4px 4px 0 0 #0A0A0A !important;
 }
 
 .leaflet-popup-tip {
-  background: #0f172a !important;
+  background: #FFFFFF !important;
+  border: 2px solid #0A0A0A !important;
+  box-shadow: none !important;
 }
 
-/* Custom scrollbars */
+.leaflet-popup-close-button {
+  color: #0A0A0A !important;
+  font-weight: 700 !important;
+}
+
+.leaflet-bar,
+.leaflet-control-zoom a {
+  background: #FFFFFF !important;
+  color: #0A0A0A !important;
+  border: 1px solid #0A0A0A !important;
+  border-radius: 0 !important;
+  font-weight: 700 !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background: #F74B00 !important;
+  color: #fff !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.85) !important;
+  color: #6E6E6E !important;
+  border-top: 1px solid #0A0A0A !important;
+  border-left: 1px solid #0A0A0A !important;
+  font-family: 'Roboto Mono', monospace !important;
+  font-size: 9px !important;
+}
+
+.leaflet-control-attribution a {
+  color: #1438AA !important;
+}
+
+/* Squared-off scrollbars to match the drafting furniture */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0d121f;
+  background: #EAE9E4;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1f293d;
-  border-radius: 3px;
+  background: #0A0A0A;
+  border: 2px solid #EAE9E4;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #F74B00;
 }
 
-/* Respect reduced-motion preferences */
+/* The incident report is meant to be printed */
+@media print {
+  body {
+    background: #fff;
+    background-image: none;
+  }
+
+  aside,
+  .no-print {
+    display: none !important;
+  }
+
+  .sheet {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
