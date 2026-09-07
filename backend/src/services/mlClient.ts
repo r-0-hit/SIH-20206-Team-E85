@@ -236,6 +236,28 @@ export class MLClientService {
         historical_detections: isPersistent ? 110 : 1,
         is_persistent: isPersistent,
       },
+      thermal_twin: {
+        z_score: isIndustrial ? (frp > 120 ? 3.2 : 1.2) : 0.4,
+        anomaly_ratio: isIndustrial ? (frp > 120 ? 2.4 : 1.1) : 1.0,
+        expected_frp: isIndustrial ? 50.0 : 20.0,
+        anomaly_severity: isIndustrial && frp > 120 ? 'ANOMALOUS' : 'NORMAL',
+        alert_message: isIndustrial && frp > 120 ? 'Current hotspot behaviour is 2.4× above the learned baseline.' : null,
+      },
+      shap_explanation: [
+        { feature: 'frp_mw', contribution: 0.35, direction: 'INCREASES_RISK', label: 'Fire Radiative Power' },
+        { feature: 'dist_to_industrial_km', contribution: 0.28, direction: 'INCREASES_RISK', label: 'Proximity to Facility' },
+        { feature: 'brightness_kelvin', contribution: 0.15, direction: 'INCREASES_RISK', label: 'Brightness Temp' },
+      ],
+      prediction: {
+        current: riskScore,
+        min_30: Math.min(99, Math.round(riskScore * 1.08)),
+        min_60: Math.min(99, Math.round(riskScore * 1.15)),
+        min_120: Math.min(99, Math.round(riskScore * 1.22)),
+        trend: riskScore >= 75 ? 'ESCALATING' : 'STABLE',
+        growth_rate_pct: 15,
+        alert: riskScore >= 75 ? '🔴 Potential escalation detected. Thermal spread exceeds baseline.' : null,
+        lead_time_minutes: riskScore >= 75 ? 85 : null,
+      },
       indicators: [
         `Proximity: Nearest facility is ${minDist <= 2 ? 'within immediate buffer' : `${minDist.toFixed(1)} km away`}`,
         `Fire Radiative Power: ${frp} MW recorded by satellite`,

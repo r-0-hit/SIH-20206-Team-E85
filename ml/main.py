@@ -62,16 +62,16 @@ persistence_tracker = PersistenceTracker()
 if os.path.exists(MODEL_PATH):
     try:
         pipeline = joblib.load(MODEL_PATH)
-        print("✅ Classifier pipeline loaded successfully.")
+        print("[SUCCESS] Classifier pipeline loaded successfully.")
     except Exception as e:
-        print(f"⚠️  Warning: Failed to load model from {MODEL_PATH}: {e}")
+        print(f"[WARNING] Failed to load model from {MODEL_PATH}: {e}")
 
 if os.path.exists(META_PATH):
     try:
         with open(META_PATH, "r") as f:
             model_meta = json.load(f)
     except Exception as e:
-        print(f"⚠️  Warning: Failed to load metadata: {e}")
+        print(f"[WARNING] Failed to load metadata: {e}")
 
 
 # ── Pydantic Schemas ──────────────────────────────────────────────────────────
@@ -233,7 +233,21 @@ def predict_anomaly(data: AnomalyInput):
     )
     shap_explanation = generate_shap_explanation(pipeline, feature_arr[0].tolist(), used_feature_names)
 
-    # 9. Register detection in persistence tracker
+    # 9. Future risk timeline projection (+30, +60, +120 min)
+    hotspot_data = {
+        "frp": data.frp,
+        "brightness": data.brightness,
+        "classification": prediction_label,
+        "confidence": top_confidence,
+        "dist_to_industrial": dist_ind,
+        "persistence_score": pers.get("persistence_score", 0.1),
+        "is_night": is_night,
+        "thermal_anomaly_z_score": twin_result.get("z_score", 0.0),
+        "anomaly_ratio": twin_result.get("anomaly_ratio", 1.0),
+    }
+    prediction_timeline = risk_predictor.project_risk_timeline(hotspot_data, twin_result)
+
+    # 10. Register detection in persistence tracker
     persistence_tracker.register_detection(data.lat, data.lon, data.frp)
 
     inference_latency_ms = round((time.time() - start_time) * 1000, 2)
@@ -252,6 +266,7 @@ def predict_anomaly(data: AnomalyInput):
         "thermal_twin": twin_result,
         "indicators": indicators,
         "shap_explanation": shap_explanation,
+        "prediction": prediction_timeline,
         "recommended_action": recommendations,
         "features": {name: val for name, val in zip(used_feature_names, feature_arr[0].tolist())},
         "telemetry": {
