@@ -1,0 +1,76 @@
+{
+  "model_name": "THERMOSAFE AI Thermal Twin Classifier",
+  "model_type": "RandomForestClassifier",
+  "n_estimators": 120,
+  "classes": [
+    "INDUSTRIAL_ACCIDENTAL_FIRE",
+    "INDUSTRIAL_PERSISTENT",
+    "WILDFIRE",
+    "AGRICULTURAL_BURNING",
+    "MINING_EXTRACTION",
+    "OTHER_OR_FALSE_ALARM"
+  ],
+  "features": [
+    "brightness_kelvin",
+    "frp_mw",
+    "day_night_encoded",
+    "confidence_normalized",
+    "dist_to_industrial_km",
+    "dist_to_forest_km",
+    "dist_to_farmland_km",
+    "industrial_density_10km",
+    "persistence_score",
+    "frp_to_persistence_ratio",
+    "thermal_anomaly_z_score",
+    "anomaly_ratio"
+  ],
+  "test_accuracy": 1.0,
+  "feature_importances": {
+    "anomaly_ratio": 0.1873,
+    "dist_to_forest_km": 0.1354,
+    "dist_to_industrial_km": 0.1316,
+    "persistence_score": 0.1227,
+    "dist_to_farmland_km": 0.1007,
+    "thermal_anomaly_z_score": 0.087,
+    "frp_mw": 0.0826,
+    "industrial_density_10km": 0.0632,
+    "confidence_normalized": 0.0417,
+    "brightness_kelvin": 0.0257,
+    "frp_to_persistence_ratio": 0.022,
+    "day_night_encoded": 0.0002
+  },
+  "n_training_samples": 2025,
+  "n_test_samples": 675,
+  "evaluation_metrics": {
+    "INDUSTRIAL_ACCIDENTAL_FIRE": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0
+    },
+    "INDUSTRIAL_PERSISTENT": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0
+    },
+    "WILDFIRE": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0
+    },
+    "AGRICULTURAL_BURNING": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0
+    },
+    "MINING_EXTRACTION": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0
+    },
+    "OTHER_OR_FALSE_ALARM": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0
+    }
+  }
+}

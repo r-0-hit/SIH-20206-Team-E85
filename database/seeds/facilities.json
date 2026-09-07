@@ -1,0 +1,179 @@
+[
+  {
+    "id": "IND-REF-001",
+    "name": "Reliance Jamnagar Refinery Complex",
+    "type": "petroleum_refinery",
+    "lat": 22.3619,
+    "lon": 69.8318,
+    "country": "India",
+    "risk_category": "CRITICAL",
+    "operational_flaring": 1,
+    "buffer_km": 5.0
+  },
+  {
+    "id": "IND-REF-002",
+    "name": "IOCL Panipat Refinery & Petrochemical Complex",
+    "type": "petroleum_refinery",
+    "lat": 29.3941,
+    "lon": 76.8833,
+    "country": "India",
+    "risk_category": "CRITICAL",
+    "operational_flaring": 1,
+    "buffer_km": 4.0
+  },
+  {
+    "id": "IND-REF-003",
+    "name": "BPCL Mumbai Refinery, Mahul",
+    "type": "petroleum_refinery",
+    "lat": 19.0062,
+    "lon": 72.8953,
+    "country": "India",
+    "risk_category": "CRITICAL",
+    "operational_flaring": 1,
+    "buffer_km": 3.0
+  },
+  {
+    "id": "IND-REF-004",
+    "name": "HPCL Visakhapatnam Refinery",
+    "type": "petroleum_refinery",
+    "lat": 17.6981,
+    "lon": 83.2575,
+    "country": "India",
+    "risk_category": "CRITICAL",
+    "operational_flaring": 1,
+    "buffer_km": 3.5
+  },
+  {
+    "id": "IND-REF-005",
+    "name": "Jurong Island Petrochemical Cluster",
+    "type": "chemical_complex",
+    "lat": 1.2667,
+    "lon": 103.7000,
+    "country": "Singapore",
+    "risk_category": "HIGH",
+    "operational_flaring": 1,
+    "buffer_km": 4.0
+  },
+  {
+    "id": "IND-REF-006",
+    "name": "Ras Tanura Refinery & Terminal",
+    "type": "petroleum_refinery",
+    "lat": 26.6500,
+    "lon": 50.1500,
+    "country": "Saudi Arabia",
+    "risk_category": "CRITICAL",
+    "operational_flaring": 1,
+    "buffer_km": 6.0
+  },
+  {
+    "id": "IND-REF-007",
+    "name": "Houston Ship Channel Petrochemical Hub",
+    "type": "chemical_complex",
+    "lat": 29.7340,
+    "lon": -95.2340,
+    "country": "USA",
+    "risk_category": "HIGH",
+    "operational_flaring": 1,
+    "buffer_km": 6.0
+  },
+  {
+    "id": "IND-PWR-001",
+    "name": "Mundra Thermal Power Station",
+    "type": "thermal_power_plant",
+    "lat": 22.8256,
+    "lon": 69.5292,
+    "country": "India",
+    "risk_category": "HIGH",
+    "operational_flaring": 0,
+    "buffer_km": 3.0
+  },
+  {
+    "id": "IND-PWR-002",
+    "name": "NTPC Vindhyachal Super Thermal Station",
+    "type": "thermal_power_plant",
+    "lat": 24.1011,
+    "lon": 82.6719,
+    "country": "India",
+    "risk_category": "HIGH",
+    "operational_flaring": 0,
+    "buffer_km": 3.5
+  },
+  {
+    "id": "IND-PWR-003",
+    "name": "Korba Super Thermal Power Plant",
+    "type": "thermal_power_plant",
+    "lat": 22.3831,
+    "lon": 82.7214,
+    "country": "India",
+    "risk_category": "HIGH",
+    "operational_flaring": 0,
+    "buffer_km": 3.0
+  },
+  {
+    "id": "IND-STL-001",
+    "name": "Tata Steel Works, Jamshedpur",
+    "type": "steel_mill",
+    "lat": 22.7925,
+    "lon": 86.1950,
+    "country": "India",
+    "risk_category": "HIGH",
+    "operational_flaring": 1,
+    "buffer_km": 4.0
+  },
+  {
+    "id": "IND-STL-002",
+    "name": "SAIL Rourkela Steel Plant",
+    "type": "steel_mill",
+    "lat": 22.2133,
+    "lon": 84.8633,
+    "country": "India",
+    "risk_category": "HIGH",
+    "operational_flaring": 1,
+    "buffer_km": 3.5
+  },
+  {
+    "id": "IND-STL-003",
+    "name": "JSW Steel Vijayanagar Works, Bellary",
+    "type": "steel_mill",
+    "lat": 15.1786,
+    "lon": 76.6744,
+    "country": "India",
+    "risk_category": "HIGH",
+    "operational_flaring": 1,
+    "buffer_km": 4.0
+  },
+  {
+    "id": "IND-MIN-001",
+    "name": "Jharia Coalfield Underground Fire Zone",
+    "type": "coal_mine",
+    "lat": 23.7431,
+    "lon": 86.4175,
+    "country": "India",
+    "risk_category": "HIGH",
+    "operational_flaring": 0,
+    "buffer_km": 5.0
+  },
+  {
+    "id": "IND-MIN-002",
+    "name": "Singrauli Open Cast Coal Mining Basin",
+    "type": "coal_mine",
+    "lat": 24.1950,
+    "lon": 82.6840,
+    "country": "India",
+    "risk_category": "MEDIUM",
+    "operational_flaring": 0,
+    "buffer_km": 4.0
+  },
+  {
+    "id": "IND-FLR-001",
+    "name": "Mumbai High Offshore Flaring Platform Complex",
+    "type": "offshore_flaring_platform",
+    "lat": 19.4167,
+    "lon": 71.3333,
+    "country": "India",
+    "risk_category": "HIGH",
+    "operational_flaring": 1,
+    "buffer_km": 6.0
+  }
+]
+
