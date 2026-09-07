@@ -67,16 +67,52 @@ class FacilityThermalTwin:
             self.overall_std = 10.0
             self.daily_frequency = 0.0
 
+    def update_observation(self, frp: float, current_hour: int) -> None:
+        """
+        Dynamically update baseline statistics when a new FIRMS satellite observation arrives.
+        Uses incremental running mean & standard deviation update logic.
+        """
+        if current_hour < 0 or current_hour > 23:
+            current_hour = 12
+
+        # Increment sample count
+        self.sample_count += 1
+
+        # Hourly running mean update
+        old_mean = self.mean_frp_by_hour.get(current_hour, self.overall_mean if self.overall_mean > 0 else 50.0)
+        old_std = self.std_frp_by_hour.get(current_hour, 10.0)
+
+        # Learning rate alpha: higher weight for new observations when samples are few
+        alpha = max(0.05, 1.0 / min(self.sample_count, 100))
+        new_mean = (1 - alpha) * old_mean + alpha * frp
+
+        # Standard deviation running estimate update
+        variance = (1 - alpha) * (old_std ** 2) + alpha * ((frp - new_mean) ** 2)
+        new_std = max(math.sqrt(variance), 10.0)
+
+        self.mean_frp_by_hour[current_hour] = round(new_mean, 2)
+        self.std_frp_by_hour[current_hour] = round(new_std, 2)
+
+        # Overall running stats
+        self.overall_mean = round((1 - alpha) * self.overall_mean + alpha * frp, 2) if self.overall_mean > 0 else round(frp, 2)
+        self.daily_frequency = round(self.sample_count / 30.0, 2)
+
+        # Persist updated baseline to disk
+        try:
+            self.save_baseline(self.facility_id)
+        except Exception:
+            pass
+
     def detect_anomaly(self, facility_id: str, current_frp: float, current_hour: int) -> Dict[str, Any]:
         """
-        Detect if current observation is anomalous.
+        Detect if current observation is anomalous relative to facility learned baseline.
         """
         if current_hour in self.mean_frp_by_hour and self.sample_count > 0 and self.mean_frp_by_hour[current_hour] > 0:
             mean = self.mean_frp_by_hour[current_hour]
             std = self.std_frp_by_hour[current_hour]
         else:
-            mean = self.overall_mean
-            std = self.overall_std
+            mean = self.overall_mean if self.overall_mean > 0 else 50.0
+            std = self.overall_std if self.overall_std > 0 else 10.0
             
         if std < 10.0:
             std = 10.0
@@ -96,13 +132,21 @@ class FacilityThermalTwin:
         alert_message = None
         if severity != 'NORMAL':
             alert_message = f"🔴 Current hotspot behaviour is {anomaly_ratio:.1f}× above the learned baseline."
+
+        # Model confidence rated by sample volume
+        confidence_pct = round(min(1.0, max(0.2, self.sample_count / 50.0)) * 100, 1)
             
         return {
-            'z_score': z_score,
-            'anomaly_ratio': anomaly_ratio,
-            'expected_frp': mean,
+            'z_score': round(z_score, 2),
+            'anomaly_ratio': round(anomaly_ratio, 2),
+            'expected_frp': round(mean, 2),
+            'std_frp': round(std, 2),
             'anomaly_severity': severity,
-            'alert_message': alert_message
+            'alert_message': alert_message,
+            'current_hour': current_hour,
+            'sample_count': self.sample_count,
+            'confidence_rating_pct': confidence_pct,
+            'is_learned_from_history': self.sample_count > 0,
         }
         
     def load_baseline(self, facility_id: str) -> bool:
@@ -167,3 +211,10 @@ def detect_facility_anomaly(facility_id: str, current_frp: float, current_hour: 
     """Convenience wrapper for anomaly detection."""
     twin = get_or_create_twin(facility_id)
     return twin.detect_anomaly(facility_id, current_frp, current_hour)
+
+def update_facility_baseline(facility_id: str, current_frp: float, current_hour: int) -> Dict[str, Any]:
+    """Dynamically update facility baseline with new satellite observation."""
+    twin = get_or_create_twin(facility_id)
+    twin.update_observation(current_frp, current_hour)
+    return twin.detect_anomaly(facility_id, current_frp, current_hour)
+

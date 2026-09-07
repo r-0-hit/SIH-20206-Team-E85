@@ -28,6 +28,7 @@ from ml.core.persistence import PersistenceTracker
 from ml.core.thermal_twin import (
     get_or_create_twin,
     detect_facility_anomaly,
+    update_facility_baseline,
     TWIN_REGISTRY,
 )
 from ml.core.predictor import risk_predictor
@@ -173,7 +174,7 @@ def predict_anomaly(data: AnomalyInput):
         except ValueError:
             current_hour = 12
 
-    twin_result = detect_facility_anomaly(facility_id, data.frp, current_hour)
+    twin_result = update_facility_baseline(facility_id, data.frp, current_hour)
     metadata["thermal_twin"] = twin_result
 
     # 3. Extend features with twin anomaly values (12-feature vector)

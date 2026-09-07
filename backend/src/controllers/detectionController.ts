@@ -382,6 +382,34 @@ export const fetchFIRMSSwath = async (req: AuthRequest, res: Response) => {
         ]
       );
 
+      // Persist raw FIRMS observation into hotspot_history table for dynamic baseline learning
+      const acqHour = raw.acq_time ? parseInt(raw.acq_time.slice(0, 2)) || 0 : 12;
+      try {
+        await run(
+          `INSERT OR IGNORE INTO hotspot_history (
+            id, lat, lon, frp, brightness, confidence, satellite, daynight,
+            acq_date, acq_time, acq_hour, nearest_facility_id, nearest_facility_dist_km
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            `HIST-${analysisId}`,
+            raw.lat,
+            raw.lon,
+            raw.frp,
+            raw.brightness,
+            String(raw.confidence),
+            raw.satellite,
+            raw.daynight,
+            raw.acq_date,
+            raw.acq_time,
+            acqHour,
+            ml.nearest_facility.id,
+            ml.nearest_facility.distance_km,
+          ]
+        );
+      } catch (e) {
+        // Continue gracefully if table constraint triggers
+      }
+
       analyzedAnomalies.push({
         ...raw,
         id: analysisId,
