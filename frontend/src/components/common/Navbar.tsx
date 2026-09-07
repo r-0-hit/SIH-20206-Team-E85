@@ -21,22 +21,22 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [showTelegramModal, setShowTelegramModal] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-[#0c121e]/90 backdrop-blur-md border-b border-slate-800/80 px-4 lg:px-8 py-3 transition-all">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#090D16]/85 px-4 py-3 backdrop-blur-xl transition-all duration-300 lg:px-8">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Brand Logo & Tagline */}
         <div
           onClick={() => onNavigate('landing')}
           className="flex items-center gap-3 cursor-pointer group"
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-600 to-amber-600 flex items-center justify-center shadow-[0_0_16px_rgba(244,63,94,0.4)] group-hover:scale-105 transition-transform">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-accent-500 to-indigo-600 shadow-glow transition-transform duration-300 group-hover:scale-105">
             <Flame className="w-6 h-6 text-white" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-lg lg:text-xl tracking-tight text-white font-mono">
-                Pyro<span className="text-rose-500">Guard</span>
+              <span className="text-lg font-extrabold tracking-tight text-white lg:text-xl">
+                Pyro<span className="text-accent-400">Guard</span>
               </span>
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">
+              <span className="rounded-md border border-accent-500/30 bg-accent-500/10 px-1.5 py-0.5 text-[10px] font-bold text-accent-300">
                 AI / GIS
               </span>
             </div>
@@ -51,14 +51,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           {activeCriticalCount > 0 ? (
             <div
               onClick={() => onNavigate('map')}
-              className="cursor-pointer flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-950/60 border border-rose-800/60 text-rose-300 text-xs font-mono animate-pulse hover:bg-rose-900/60 transition"
+              className="flex cursor-pointer items-center gap-2 rounded-full border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 font-mono text-xs text-rose-300 transition-all duration-300 hover:bg-rose-500/20"
             >
               <ShieldAlert className="w-4 h-4 text-rose-400" />
               <span className="font-bold">{activeCriticalCount} ACTIVE CRITICAL HAZARD(S)</span>
               <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
             </div>
           ) : (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-950/40 border border-emerald-800/40 text-emerald-300 text-xs font-mono">
+            <div className="flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 font-mono text-xs text-emerald-300">
               <Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
               <span>SATELLITE TELEMETRY NORMAL</span>
             </div>
@@ -81,8 +81,8 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center gap-3">
           {currentUser ? (
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2.5 bg-slate-800/60 border border-slate-700/80 px-3 py-1.5 rounded-xl">
-                <div className="w-7 h-7 rounded-lg bg-blue-600/30 border border-blue-500/40 text-blue-300 flex items-center justify-center font-bold text-xs">
+              <div className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 backdrop-blur-md">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-accent-500/40 bg-accent-500/20 text-xs font-bold text-accent-300">
                   {currentUser.fullName.charAt(0)}
                 </div>
                 <div className="hidden sm:block text-left">
@@ -101,7 +101,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 onClick={onLogout}
                 title="Log Out"
-                className="p-2 rounded-xl bg-slate-800/80 hover:bg-rose-950/80 border border-slate-700 hover:border-rose-700/60 text-slate-300 hover:text-rose-300 transition"
+                className="rounded-xl border border-white/10 bg-white/[0.04] p-2 text-slate-300 transition-all duration-300 hover:border-rose-500/40 hover:bg-rose-500/10 hover:text-rose-300"
               >
                 <LogOut className="w-4 h-4" />
               </button>
@@ -109,7 +109,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           ) : (
             <button
               onClick={() => onNavigate('login')}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-xs transition shadow-lg shadow-blue-500/20"
+              className="flex items-center gap-2 rounded-xl bg-accent-500 px-4 py-2 text-xs font-bold text-white shadow-glow transition-all duration-300 hover:-translate-y-0.5 hover:bg-accent-400 hover:shadow-glow-lg"
             >
               <UserIcon className="w-3.5 h-3.5" />
               Sign In

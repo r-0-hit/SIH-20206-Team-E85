@@ -33,7 +33,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, curren
   }
 
   return (
-    <aside className="w-full lg:w-64 bg-[#0c121e]/80 backdrop-blur-md border-b lg:border-b-0 lg:border-r border-slate-800/80 p-3 lg:p-4 flex lg:flex-col justify-between shrink-0">
+    <aside className="flex w-full shrink-0 justify-between border-b border-white/10 bg-[#0B111C]/80 p-3 backdrop-blur-xl lg:w-64 lg:flex-col lg:border-b-0 lg:border-r lg:p-4">
       <div className="space-y-1 w-full flex lg:flex-col overflow-x-auto lg:overflow-visible gap-1 lg:gap-1.5 pb-2 lg:pb-0">
         <div className="hidden lg:block px-3 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
           Intelligence Console
@@ -46,10 +46,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, curren
             <button
               key={item.id}
               onClick={() => onNavigate(item.id)}
-              className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 w-auto lg:w-full text-left ${
+              className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-300 w-auto lg:w-full text-left ${
                 isActive
-                  ? 'bg-gradient-to-r from-blue-600/90 to-indigo-600/90 text-white shadow-lg shadow-blue-500/20 border border-blue-400/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  ? 'border border-accent-400/30 bg-accent-500/90 text-white shadow-glow'
+                  : 'border border-transparent text-slate-400 hover:bg-white/5 hover:text-slate-100'
               }`}
             >
               <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />

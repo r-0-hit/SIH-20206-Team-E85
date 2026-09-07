@@ -24,25 +24,25 @@ export const StatCard: React.FC<StatCardProps> = ({
   return (
     <div
       onClick={onClick}
-      className={`glass-panel p-5 rounded-2xl border transition-all duration-300 hover:border-slate-600 hover:shadow-lg relative overflow-hidden group ${
+      className={`glass-card group relative overflow-hidden p-5 ${
         onClick ? 'cursor-pointer' : ''
       }`}
     >
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{title}</p>
-          <h3 className="text-2xl lg:text-3xl font-extrabold text-slate-100 font-mono mt-2 tracking-tight">
+          <h3 className="mt-2 font-mono text-2xl font-extrabold tracking-tight text-slate-50 lg:text-3xl">
             {value}
           </h3>
           {subtitle && <p className="text-xs text-slate-400 mt-1">{subtitle}</p>}
         </div>
-        <div className="p-3 rounded-xl bg-slate-800/80 text-slate-200 border border-slate-700/60 shadow-inner group-hover:scale-110 transition-transform">
+        <div className="rounded-xl border border-white/10 bg-white/[0.05] p-3 text-slate-200 transition-transform duration-300 group-hover:scale-110">
           {icon}
         </div>
       </div>
 
       {trend && (
-        <div className="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs">
+        <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3 text-xs">
           <span className={trendPositive ? 'text-emerald-400 font-semibold' : 'text-rose-400 font-semibold'}>
             {trend}
           </span>

@@ -93,8 +93,14 @@ export const App: React.FC = () => {
     (d) => d.risk_score >= 80 && d.status === 'ACTIVE'
   ).length;
 
+  // The public marketing site renders standalone, without the console chrome,
+  // so its sticky header and smooth-scroll anchors work against the document.
+  if (activePage === 'landing') {
+    return <LandingPage onNavigate={(page) => setActivePage(page)} />;
+  }
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#090d16] text-slate-100 selection:bg-rose-500 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-[#090D16] text-slate-50">
       {/* Top Navbar */}
       <Navbar
         currentUser={currentUser}
@@ -107,7 +113,7 @@ export const App: React.FC = () => {
       {/* Main App Layout */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Sidebar Navigation */}
-        {activePage !== 'landing' && activePage !== 'login' && (
+        {activePage !== 'login' && (
           <Sidebar
             activePage={activePage}
             onNavigate={(page) => setActivePage(page)}
@@ -117,10 +123,6 @@ export const App: React.FC = () => {
 
         {/* Dynamic Page Views */}
         <main className="flex-1 overflow-y-auto">
-          {activePage === 'landing' && (
-            <LandingPage onNavigate={(page) => setActivePage(page)} />
-          )}
-
           {activePage === 'dashboard' && (
             <DashboardPage
               analytics={analytics}
