@@ -18,10 +18,10 @@
   }
 
   body {
-    background-color: theme('colors.paper.DEFAULT');
-    background-image: theme('backgroundImage.grid-fine');
+    background-color: #F3F3F1;
+    background-image: linear-gradient(to right, rgba(10,10,10,0.045) 1px, transparent 1px), linear-gradient(to bottom, rgba(10,10,10,0.045) 1px, transparent 1px);
     background-size: 8px 8px;
-    color: theme('colors.ink.DEFAULT');
+    color: #0A0A0A;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
@@ -43,7 +43,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid theme('colors.signal.DEFAULT');
+    outline: 2px solid #F74B00;
     outline-offset: 2px;
   }
 }
@@ -51,13 +51,16 @@
 @layer components {
   /* ── Sheets & panels ─────────────────────────────────────────────────────── */
   .sheet {
-    @apply relative border-2 border-ink bg-paper-raised;
+    @apply relative border-2;
+    border-color: #0A0A0A;
+    background-color: #FFFFFF;
   }
 
   /* The double-line drafting frame: an inner hairline offset from the border */
   .sheet-framed::before {
     content: '';
-    @apply pointer-events-none absolute inset-[5px] border border-ink/15;
+    @apply pointer-events-none absolute inset-[5px] border;
+    border-color: rgba(10, 10, 10, 0.15);
   }
 
   .sheet-hover {
@@ -65,7 +68,8 @@
   }
 
   .sheet-hover:hover {
-    @apply -translate-x-0.5 -translate-y-0.5 border-signal;
+    @apply -translate-x-0.5 -translate-y-0.5;
+    border-color: #F74B00;
     box-shadow: 4px 4px 0 0 #F74B00;
   }
 
@@ -92,42 +96,55 @@
   /* A small vermilion index tab on the top-right of a sheet */
   .tab-signal::before {
     content: '';
-    @apply absolute right-0 top-0 h-1.5 w-12 bg-signal;
+    @apply absolute right-0 top-0 h-1.5 w-12;
+    background-color: #F74B00;
   }
 
   .panel-head {
-    @apply flex flex-wrap items-center justify-between gap-3 border-b-2 border-ink px-4 py-3;
+    @apply flex flex-wrap items-center justify-between gap-3 border-b-2 px-4 py-3;
+    border-color: #0A0A0A;
   }
 
   .panel-title {
-    @apply flex items-center gap-2 font-display text-sm font-extrabold uppercase tracking-tight text-ink;
+    @apply flex items-center gap-2 text-sm font-extrabold uppercase tracking-tight;
+    font-family: 'Archivo', 'Inter', system-ui, sans-serif;
+    color: #0A0A0A;
   }
 
   /* ── Typography ──────────────────────────────────────────────────────────── */
   .rule-title {
-    @apply font-display text-2xl font-extrabold uppercase leading-none tracking-tight text-ink sm:text-3xl;
+    @apply text-2xl font-extrabold uppercase leading-none tracking-tight sm:text-3xl;
+    font-family: 'Archivo', 'Inter', system-ui, sans-serif;
+    color: #0A0A0A;
   }
 
   /* Heavy title underscored by a thick rule, as on every deck slide */
   .rule-underline {
-    @apply border-b-4 border-ink pb-2;
+    @apply border-b-4 pb-2;
+    border-color: #0A0A0A;
   }
 
   .annotation {
-    @apply font-mono text-[11px] uppercase tracking-[0.12em] text-ink-muted;
+    @apply font-mono text-[11px] uppercase tracking-[0.12em];
+    color: #6E6E6E;
   }
 
   /* KEY: value annotation pairs */
   .key {
-    @apply font-mono text-[11px] font-bold uppercase tracking-wider text-ink;
+    @apply font-mono text-[11px] font-bold uppercase tracking-wider;
+    color: #0A0A0A;
   }
 
   .val {
-    @apply font-mono text-[11px] uppercase tracking-wider text-ink-muted;
+    @apply font-mono text-[11px] uppercase tracking-wider;
+    color: #6E6E6E;
   }
 
   .callout {
-    @apply relative border-2 border-ink bg-paper-raised px-4 py-3 font-mono text-xs uppercase tracking-wide text-ink;
+    @apply relative border-2 px-4 py-3 font-mono text-xs uppercase tracking-wide;
+    border-color: #0A0A0A;
+    background-color: #FFFFFF;
+    color: #0A0A0A;
   }
 
   /* ── Controls ────────────────────────────────────────────────────────────── */
@@ -138,31 +155,54 @@
   }
 
   .btn-primary {
-    @apply btn border-ink bg-signal text-white shadow-hard-sm
+    @apply btn shadow-hard-sm
            hover:-translate-x-px hover:-translate-y-px hover:shadow-hard
            active:translate-x-0 active:translate-y-0 active:shadow-none;
+    border-color: #0A0A0A;
+    background-color: #F74B00;
+    color: #FFFFFF;
   }
 
   .btn-secondary {
-    @apply btn border-ink bg-paper-raised text-ink shadow-hard-sm
+    @apply btn shadow-hard-sm
            hover:-translate-x-px hover:-translate-y-px hover:shadow-hard
            active:translate-x-0 active:translate-y-0 active:shadow-none;
+    border-color: #0A0A0A;
+    background-color: #FFFFFF;
+    color: #0A0A0A;
   }
 
   .btn-blueprint {
-    @apply btn border-ink bg-blueprint text-white shadow-hard-sm
+    @apply btn shadow-hard-sm
            hover:-translate-x-px hover:-translate-y-px hover:shadow-hard
            active:translate-x-0 active:translate-y-0 active:shadow-none;
+    border-color: #0A0A0A;
+    background-color: #1438AA;
+    color: #FFFFFF;
   }
 
   .btn-ghost {
-    @apply btn border-transparent text-ink-muted hover:border-ink hover:text-ink;
+    @apply btn border-transparent;
+    color: #6E6E6E;
+  }
+
+  .btn-ghost:hover {
+    border-color: #0A0A0A;
+    color: #0A0A0A;
   }
 
   .btn-icon {
-    @apply inline-flex h-9 w-9 items-center justify-center border-2 border-ink bg-paper-raised text-ink
-           transition-all duration-150 hover:bg-ink hover:text-paper-raised
+    @apply inline-flex h-9 w-9 items-center justify-center border-2
+           transition-all duration-150
            disabled:pointer-events-none disabled:opacity-40;
+    border-color: #0A0A0A;
+    background-color: #FFFFFF;
+    color: #0A0A0A;
+  }
+
+  .btn-icon:hover {
+    background-color: #0A0A0A;
+    color: #FFFFFF;
   }
 
   .btn-sm {
@@ -170,14 +210,29 @@
   }
 
   .label {
-    @apply mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted;
+    @apply mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-[0.14em];
+    color: #6E6E6E;
   }
 
   .input,
   .select {
-    @apply w-full border-2 border-ink bg-paper-raised px-3 py-2 font-mono text-xs text-ink
-           transition-colors duration-150 placeholder:text-ink-faint placeholder:normal-case
-           focus:border-signal focus:outline-none;
+    @apply w-full border-2 px-3 py-2 font-mono text-xs
+           transition-colors duration-150;
+    border-color: #0A0A0A;
+    background-color: #FFFFFF;
+    color: #0A0A0A;
+  }
+
+  .input::placeholder,
+  .select::placeholder {
+    color: #9A9A96;
+    text-transform: none;
+  }
+
+  .input:focus,
+  .select:focus {
+    border-color: #F74B00;
+    outline: none;
   }
 
   .select {
@@ -191,31 +246,52 @@
   }
 
   .tag-ink {
-    @apply tag border-ink bg-paper-raised text-ink;
+    @apply tag;
+    border-color: #0A0A0A;
+    background-color: #FFFFFF;
+    color: #0A0A0A;
   }
 
   .tag-signal {
-    @apply tag border-signal bg-signal-soft text-signal-deep;
+    @apply tag;
+    border-color: #F74B00;
+    background-color: #FFF0E9;
+    color: #C93A00;
   }
 
   .tag-blueprint {
-    @apply tag border-blueprint bg-blueprint-soft text-blueprint;
+    @apply tag;
+    border-color: #1438AA;
+    background-color: #EBEFFB;
+    color: #1438AA;
   }
 
   .tag-solid {
-    @apply tag border-ink bg-ink text-paper-raised;
+    @apply tag;
+    border-color: #0A0A0A;
+    background-color: #0A0A0A;
+    color: #FFFFFF;
   }
 
   .tag-ok {
-    @apply tag border-risk-low bg-[#EAF5EF] text-risk-low;
+    @apply tag;
+    border-color: #1B7A4B;
+    background-color: #EAF5EF;
+    color: #1B7A4B;
   }
 
   .tag-warn {
-    @apply tag border-risk-moderate bg-[#FBF3E2] text-risk-moderate;
+    @apply tag;
+    border-color: #B47A00;
+    background-color: #FBF3E2;
+    color: #B47A00;
   }
 
   .tag-danger {
-    @apply tag border-risk-critical bg-[#FDECE8] text-risk-critical;
+    @apply tag;
+    border-color: #D42200;
+    background-color: #FDECE8;
+    color: #D42200;
   }
 
   /* ── Data tables ─────────────────────────────────────────────────────────── */
@@ -224,15 +300,23 @@
   }
 
   .table-shell thead {
-    @apply border-b-2 border-ink bg-paper-sunk;
+    @apply border-b-2;
+    border-color: #0A0A0A;
+    background-color: #EAE9E4;
   }
 
   .table-shell th {
-    @apply px-3 py-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-ink;
+    @apply px-3 py-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.12em];
+    color: #0A0A0A;
   }
 
   .table-shell tbody tr {
-    @apply border-b border-ink/10 transition-colors duration-150 last:border-0 hover:bg-signal-soft;
+    @apply border-b transition-colors duration-150 last:border-0;
+    border-color: rgba(10, 10, 10, 0.1);
+  }
+
+  .table-shell tbody tr:hover {
+    background-color: #FFF0E9;
   }
 
   .table-shell td {
@@ -240,18 +324,26 @@
   }
 
   .th-sortable {
-    @apply cursor-pointer select-none transition-colors duration-150 hover:text-signal;
+    @apply cursor-pointer select-none transition-colors duration-150;
+  }
+
+  .th-sortable:hover {
+    color: #F74B00;
   }
 
   /* ── Drawing furniture ───────────────────────────────────────────────────── */
   /* The title block that runs along the bottom of an engineering sheet */
   .title-block {
-    @apply flex flex-wrap items-center gap-x-4 gap-y-1 border-t-2 border-ink bg-paper-raised px-4 py-2
-           font-mono text-[10px] uppercase tracking-[0.1em] text-ink-muted;
+    @apply flex flex-wrap items-center gap-x-4 gap-y-1 border-t-2 px-4 py-2
+           font-mono text-[10px] uppercase tracking-[0.1em];
+    border-color: #0A0A0A;
+    background-color: #FFFFFF;
+    color: #6E6E6E;
   }
 
   .title-block strong {
-    @apply font-bold text-ink;
+    @apply font-bold;
+    color: #0A0A0A;
   }
 
   /* Ruler edge with repeating measurement ticks */
@@ -266,7 +358,9 @@
   }
 
   .kpi {
-    @apply font-display text-3xl font-extrabold leading-none tracking-tight text-ink;
+    @apply text-3xl font-extrabold leading-none tracking-tight;
+    font-family: 'Archivo', 'Inter', system-ui, sans-serif;
+    color: #0A0A0A;
   }
 
   .page-shell {
@@ -278,7 +372,9 @@
   }
 
   .skeleton {
-    @apply relative overflow-hidden border border-ink/15 bg-paper-sunk;
+    @apply relative overflow-hidden border;
+    border-color: rgba(10, 10, 10, 0.15);
+    background-color: #EAE9E4;
   }
 
   .skeleton::after {

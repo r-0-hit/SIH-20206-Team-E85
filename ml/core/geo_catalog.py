@@ -273,12 +273,40 @@ def estimate_land_cover_distances(lat: float, lon: float) -> Dict[str, float]:
     }
 
 
-def register_osm_facility(facility: Dict) -> None:
+def _normalize_facility(facility: Dict) -> Dict:
+    """Ensures dynamic OSM facility dict contains all standard schema keys."""
+    fac_id = str(facility.get("id") or f"OSM-{len(INDUSTRIAL_FACILITIES) + 1}")
+    name = str(facility.get("name") or "Industrial Facility")
+    f_type = str(facility.get("type") or "industrial")
+    lat = float(facility["lat"])
+    lon = float(facility["lon"])
+    country = str(facility.get("country") or "India")
+    risk_cat = str(facility.get("risk_category") or "HIGH")
+    flaring = bool(facility.get("operational_flaring", False))
+    buffer_km = float(facility.get("buffer_km", 3.0))
+
+    return {
+        "id": fac_id,
+        "name": name,
+        "type": f_type,
+        "lat": lat,
+        "lon": lon,
+        "country": country,
+        "risk_category": risk_cat,
+        "operational_flaring": flaring,
+        "buffer_km": buffer_km,
+        "is_osm_dynamic": True,
+    }
+
+
+def register_osm_facility(facility: Dict) -> bool:
     """Registers a dynamic OSM facility into the active in-memory catalog."""
+    normalized = _normalize_facility(facility)
     for existing in INDUSTRIAL_FACILITIES:
-        if existing["id"] == facility["id"]:
-            return
-    INDUSTRIAL_FACILITIES.append(facility)
+        if existing["id"] == normalized["id"]:
+            return False
+    INDUSTRIAL_FACILITIES.append(normalized)
+    return True
 
 
 def bulk_register_osm_facilities(facilities: List[Dict]) -> int:
@@ -286,9 +314,14 @@ def bulk_register_osm_facilities(facilities: List[Dict]) -> int:
     added = 0
     existing_ids = {f["id"] for f in INDUSTRIAL_FACILITIES}
     for f in facilities:
-        if f["id"] not in existing_ids:
-            INDUSTRIAL_FACILITIES.append(f)
-            existing_ids.add(f["id"])
-            added += 1
+        try:
+            normalized = _normalize_facility(f)
+            if normalized["id"] not in existing_ids:
+                INDUSTRIAL_FACILITIES.append(normalized)
+                existing_ids.add(normalized["id"])
+                added += 1
+        except (KeyError, ValueError, TypeError) as err:
+            continue
     return added
+
 

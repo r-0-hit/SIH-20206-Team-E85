@@ -183,7 +183,7 @@ export const GISMap: React.FC<GISMapProps> = ({
   }, [externalSelected]);
 
   const tileUrls = {
-    dark: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    dark: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
     satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     street: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
   };
@@ -197,6 +197,21 @@ export const GISMap: React.FC<GISMapProps> = ({
     if (!filterLow && d.risk_score < 35) return false;
     return true;
   });
+
+  // Only show facilities that are linked to at least one detection
+  const linkedFacilityIds = new Set(
+    detections
+      .map((d) => d.nearest_facility_id)
+      .filter(Boolean)
+  );
+  const linkedFacilityNames = new Set(
+    detections
+      .map((d) => d.nearest_facility_name)
+      .filter(Boolean)
+  );
+  const filteredFacilities = facilities.filter(
+    (f) => linkedFacilityIds.has(f.id) || linkedFacilityNames.has(f.name)
+  );
 
   const criticalCount = detections.filter((d) => d.risk_score >= 80).length;
   const highCount = detections.filter((d) => d.risk_score >= 60 && d.risk_score < 80).length;
@@ -321,14 +336,16 @@ export const GISMap: React.FC<GISMapProps> = ({
           />
 
           <TileLayer
-            attribution='&copy; <a href="https://carto.com/">CARTO</a> &amp; NASA FIRMS'
+            key={mapLayer}
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &amp; NASA FIRMS'
             url={tileUrls[mapLayer]}
             maxZoom={19}
+            maxNativeZoom={mapLayer === 'dark' ? 16 : 19}
           />
 
           {/* ── Industrial Facilities & Hazard Buffer Layer ────────────────── */}
           {showFacilitiesLayer &&
-            facilities.map((fac) => (
+            filteredFacilities.map((fac) => (
               <React.Fragment key={fac.id}>
                 <Marker position={[fac.lat, fac.lon]} icon={facilityIcon}>
                   <Popup>
@@ -385,6 +402,8 @@ export const GISMap: React.FC<GISMapProps> = ({
               if (!matchedFac) return null;
 
               const distKm = d.nearest_facility_dist_km ?? d.nearest_facility?.distance_km ?? 1.5;
+              // Don't draw vectors for facilities more than 10 km away
+              if (distKm > 10) return null;
               const isClose = distKm <= 2.0;
 
               return (

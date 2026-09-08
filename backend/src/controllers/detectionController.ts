@@ -5,6 +5,7 @@ import { AuthRequest } from '../middleware/auth.js';
 import { firmsService } from '../services/firmsService.js';
 import { mlClientService } from '../services/mlClient.js';
 import { notificationService } from '../services/notificationService.js';
+import { osmService } from '../services/osmService.js';
 import { AnalysisRecord, Facility } from '../types/index.js';
 
 const analyzeSchema = z.object({
@@ -604,5 +605,70 @@ export const dispatchCustomAlert = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * POST /api/detections/enrich-osm
+ * Discovers real industrial infrastructure from OpenStreetMap Overpass API,
+ * stores it into SQLite, and registers it dynamically into the ML microservice's active catalog.
+ */
+export const enrichFromOSM = async (req: Request, res: Response) => {
+  try {
+    const lat = req.body.lat ? parseFloat(req.body.lat) : undefined;
+    const lon = req.body.lon ? parseFloat(req.body.lon) : undefined;
+    const radiusKm = req.body.radiusKm ? parseFloat(req.body.radiusKm) : 25;
 
+    if (lat !== undefined && lon !== undefined && !isNaN(lat) && !isNaN(lon)) {
+      // Direct coordinate enrichment
+      const result = await osmService.syncAndRegisterNear(lat, lon, radiusKm);
+      return res.json({
+        success: true,
+        message: `Discovered and cataloged ${result.fetched} facilities from OpenStreetMap near (${lat}, ${lon}).`,
+        data: result,
+      });
+    }
 
+    // Auto-enrich for recent detections that don't have a close facility
+    const distantDetections = await query<any>(
+      `SELECT lat, lon, nearest_facility_dist_km FROM analyses
+       WHERE nearest_facility_dist_km > 15.0
+       ORDER BY frp DESC LIMIT 5`
+    );
+
+    let totalDiscovered = 0;
+    let totalAdded = 0;
+    const enrichedLocations: any[] = [];
+
+    for (const d of distantDetections) {
+      try {
+        const syncRes = await osmService.syncAndRegisterNear(d.lat, d.lon, 25);
+        totalDiscovered += syncRes.fetched;
+        totalAdded += syncRes.addedToML;
+        if (syncRes.fetched > 0) {
+          enrichedLocations.push({
+            lat: d.lat,
+            lon: d.lon,
+            facilities: syncRes.facilities.map((f: any) => f.name),
+          });
+        }
+      } catch (subErr: any) {
+        console.warn(`OSM sync sub-error for [${d.lat}, ${d.lon}]:`, subErr.message);
+      }
+    }
+
+    return res.json({
+      success: true,
+      message: `OpenStreetMap dynamic sync completed across ${distantDetections.length} regions. Discovered ${totalDiscovered} industrial facilities, registered ${totalAdded} into ML catalog.`,
+      data: {
+        totalDiscovered,
+        totalAddedToML: totalAdded,
+        regionsScanned: distantDetections.length,
+        enrichedLocations,
+      },
+    });
+  } catch (err: any) {
+    console.error('enrichFromOSM error:', err);
+    return res.status(500).json({
+      success: false,
+      message: `Failed to complete OpenStreetMap enrichment: ${err.message}`,
+    });
+  }
+};

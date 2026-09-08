@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
 dotenv.config(); // fallback to local .env
 
@@ -14,6 +15,9 @@ export const ENV = {
   CORS_ORIGIN: process.env.CORS_ORIGIN || '*',
   RATE_LIMIT_WINDOW_MS: 15 * 60 * 1000, // 15 mins
   RATE_LIMIT_MAX: 500, // requests per window
+
+  // NASA FIRMS Map Key
+  NASA_FIRMS_MAP_KEY: process.env.NASA_FIRMS_MAP_KEY || '',
 
   // SMS Alert Configuration
   SMS_ALERT_ENABLED: process.env.SMS_ALERT_ENABLED === 'true',

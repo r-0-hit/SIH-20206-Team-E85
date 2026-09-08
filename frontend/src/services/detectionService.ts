@@ -58,6 +58,26 @@ export const detectionService = {
     return apiRequest<Facility[]>('/detections/facilities');
   },
 
+  async enrichFromOSM(params?: { lat?: number; lon?: number; radiusKm?: number }): Promise<{
+    success: boolean;
+    message: string;
+    data: {
+      totalDiscovered?: number;
+      totalAddedToML?: number;
+      fetched?: number;
+      addedToML?: number;
+      totalCataloged?: number;
+      facilities?: any[];
+      regionsScanned?: number;
+      enrichedLocations?: any[];
+    };
+  }> {
+    return apiRequest('/detections/enrich-osm', {
+      method: 'POST',
+      body: JSON.stringify(params || {}),
+    });
+  },
+
   async ingestFIRMSSwath(region: string = 'Global', sensor: string = 'VIIRS-SNPP'): Promise<Detection[]> {
     return apiRequest<Detection[]>(`/detections/ingest-firms?region=${encodeURIComponent(region)}&sensor=${sensor}`, {
       method: 'POST',

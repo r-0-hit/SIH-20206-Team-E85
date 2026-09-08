@@ -23,7 +23,12 @@ from ml.core.explainer import (
     FEATURE_LABELS,
 )
 from ml.core.feature_engineering import extract_features, FEATURE_NAMES
-from ml.core.geo_catalog import INDUSTRIAL_FACILITIES, find_nearest_industrial_facility
+from ml.core.geo_catalog import (
+    INDUSTRIAL_FACILITIES,
+    find_nearest_industrial_facility,
+    register_osm_facility,
+    bulk_register_osm_facilities,
+)
 from ml.core.persistence import PersistenceTracker
 from ml.core.thermal_twin import (
     get_or_create_twin,
@@ -103,6 +108,22 @@ class WhatIfInput(BaseModel):
     facility_type: Optional[str] = Field("chemical", description="Facility type: chemical | refinery | power | steel | warehouse | other")
 
 
+class FacilityInput(BaseModel):
+    id: str = Field(..., description="Unique facility identifier (e.g. OSM-12345)")
+    name: str = Field(..., description="Facility name")
+    type: Optional[str] = Field("industrial", description="Facility category")
+    lat: float = Field(..., ge=-90.0, le=90.0, description="Latitude")
+    lon: float = Field(..., ge=-180.0, le=180.0, description="Longitude")
+    country: Optional[str] = Field("India", description="Country")
+    risk_category: Optional[str] = Field("HIGH", description="Risk classification tier")
+    operational_flaring: Optional[bool] = Field(False, description="Has operational flaring")
+    buffer_km: Optional[float] = Field(3.0, description="Industrial perimeter buffer in km")
+
+
+class BulkFacilityInput(BaseModel):
+    facilities: List[FacilityInput]
+
+
 # ── Health & Metadata ─────────────────────────────────────────────────────────
 
 @app.get("/health", tags=["system"])
@@ -130,10 +151,41 @@ def get_model_info():
 @app.get("/facilities", tags=["facilities"])
 def list_facilities():
     """Returns the catalog of registered industrial facilities for GIS overlays."""
+    osm_count = sum(1 for f in INDUSTRIAL_FACILITIES if f.get("is_osm_dynamic"))
+    seed_count = len(INDUSTRIAL_FACILITIES) - osm_count
     return {
         "success": True,
         "total": len(INDUSTRIAL_FACILITIES),
+        "seed_facilities": seed_count,
+        "osm_dynamic_facilities": osm_count,
         "facilities": INDUSTRIAL_FACILITIES,
+    }
+
+
+@app.post("/facilities/register", tags=["facilities"])
+def register_facility_endpoint(payload: FacilityInput):
+    """Registers a dynamic OSM industrial facility into the active in-memory catalog."""
+    fac_dict = payload.dict()
+    added = register_osm_facility(fac_dict)
+    return {
+        "success": True,
+        "added": 1 if added else 0,
+        "total_cataloged": len(INDUSTRIAL_FACILITIES),
+        "facility": fac_dict,
+        "message": f"Facility '{payload.name}' ({payload.id}) {'registered' if added else 'already registered'}.",
+    }
+
+
+@app.post("/facilities/bulk-register", tags=["facilities"])
+def bulk_register_facilities_endpoint(payload: BulkFacilityInput):
+    """Bulk registers multiple dynamic OSM industrial facilities into the active in-memory catalog."""
+    fac_dicts = [f.dict() for f in payload.facilities]
+    added = bulk_register_osm_facilities(fac_dicts)
+    return {
+        "success": True,
+        "added": added,
+        "total_cataloged": len(INDUSTRIAL_FACILITIES),
+        "message": f"Successfully registered {added} new facilities from OpenStreetMap.",
     }
 
 

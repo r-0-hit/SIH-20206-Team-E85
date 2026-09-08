@@ -171,6 +171,66 @@ export class MLClientService {
     }
   }
 
+  async registerFacility(facility: {
+    id: string;
+    name: string;
+    type?: string;
+    lat: number;
+    lon: number;
+    country?: string;
+    risk_category?: string;
+    operational_flaring?: boolean;
+    buffer_km?: number;
+  }): Promise<{ success: boolean; added: number; total_cataloged: number }> {
+    try {
+      const response = await fetch(`${this.serviceUrl}/facilities/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(facility),
+        signal: AbortSignal.timeout(6000),
+      });
+      if (response.ok) {
+        return (await response.json()) as { success: boolean; added: number; total_cataloged: number };
+      }
+      return { success: false, added: 0, total_cataloged: 0 };
+    } catch (err: any) {
+      console.warn(`Failed to register facility with ML service: ${err.message}`);
+      return { success: false, added: 0, total_cataloged: 0 };
+    }
+  }
+
+  async bulkRegisterFacilities(facilities: Array<{
+    id: string;
+    name: string;
+    type?: string;
+    lat: number;
+    lon: number;
+    country?: string;
+    risk_category?: string;
+    operational_flaring?: boolean;
+    buffer_km?: number;
+  }>): Promise<{ success: boolean; added: number; total_cataloged: number; message?: string }> {
+    if (!facilities || facilities.length === 0) {
+      return { success: true, added: 0, total_cataloged: 0 };
+    }
+    try {
+      const response = await fetch(`${this.serviceUrl}/facilities/bulk-register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ facilities }),
+        signal: AbortSignal.timeout(10000),
+      });
+      if (response.ok) {
+        return (await response.json()) as { success: boolean; added: number; total_cataloged: number; message?: string };
+      }
+      return { success: false, added: 0, total_cataloged: 0 };
+    } catch (err: any) {
+      console.warn(`Failed to bulk register facilities with ML service: ${err.message}`);
+      return { success: false, added: 0, total_cataloged: 0 };
+    }
+  }
+
+
   /**
    * Resilient fallback inference calculation in case ML microservice is offline or starting up.
    * Mirrors the Random Forest decision boundaries.

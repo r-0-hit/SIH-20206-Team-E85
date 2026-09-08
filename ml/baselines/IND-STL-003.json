@@ -1,0 +1,13 @@
+{
+    "facility_id": "IND-STL-003",
+    "mean_frp_by_hour": {
+        "7": 36.25
+    },
+    "std_frp_by_hour": {
+        "7": 22.37
+    },
+    "overall_mean": 36.25,
+    "overall_std": 10.0,
+    "daily_frequency": 0.7,
+    "sample_count": 21
+}

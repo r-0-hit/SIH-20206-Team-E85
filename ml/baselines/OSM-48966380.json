@@ -1,0 +1,13 @@
+{
+    "facility_id": "OSM-48966380",
+    "mean_frp_by_hour": {
+        "12": 85.0
+    },
+    "std_frp_by_hour": {
+        "12": 10.0
+    },
+    "overall_mean": 85.0,
+    "overall_std": 10.0,
+    "daily_frequency": 0.03,
+    "sample_count": 1
+}

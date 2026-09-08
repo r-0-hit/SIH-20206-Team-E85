@@ -1,8 +1,4 @@
-/**
- * THERMOSAFE — NASA FIRMS Data Ingestion Service
- * Fetches real-time thermal anomaly swaths from the NASA FIRMS API.
- * Falls back to calibrated representative observations when the API key is absent.
- */
+import { ENV } from '../config/env.js';
 
 export interface FIRMSSwathOptions {
   region?: string;
@@ -49,7 +45,12 @@ export class FIRMSService {
   private apiKey: string | undefined;
 
   constructor() {
-    this.apiKey = process.env.NASA_FIRMS_MAP_KEY;
+    this.apiKey = ENV.NASA_FIRMS_MAP_KEY || process.env.NASA_FIRMS_MAP_KEY;
+    if (this.apiKey) {
+      console.log(`[FIRMS] NASA FIRMS live satellite API connected with key: ${this.apiKey.substring(0, 6)}...`);
+    } else {
+      console.log('[FIRMS] NASA FIRMS map key not configured. Using calibrated fallback data.');
+    }
   }
 
   /**
@@ -62,11 +63,19 @@ export class FIRMSService {
     const region = options.region || 'South Asia';
     const limit = options.limit || 20;
     const days = options.days || 1;
+    const key = this.apiKey || ENV.NASA_FIRMS_MAP_KEY || process.env.NASA_FIRMS_MAP_KEY;
 
-    if (this.apiKey) {
+    if (key) {
       try {
-        const hotspots = await this.fetchFromFIRMSApi(sensor, region, days);
-        return hotspots.slice(0, limit);
+        console.log(`[FIRMS] Ingesting live NASA satellite feed for region "${region}" (${sensor})...`);
+        const hotspots = await this.fetchFromFIRMSApi(sensor, region, days, key);
+        if (hotspots.length > 0) {
+          console.log(`[FIRMS] Successfully retrieved ${hotspots.length} live satellite thermal observations from NASA.`);
+          // Sort by highest FRP first to prioritize high-energy fire events
+          hotspots.sort((a, b) => b.frp - a.frp);
+          return hotspots.slice(0, limit);
+        }
+        console.warn(`[FIRMS] NASA FIRMS API returned 0 observations for region "${region}". Using fallback.`);
       } catch (err: any) {
         console.warn(`NASA FIRMS API error: ${err.message}. Using representative data.`);
       }
@@ -82,18 +91,19 @@ export class FIRMSService {
   private async fetchFromFIRMSApi(
     sensor: string,
     region: string,
-    days: number
+    days: number,
+    key: string
   ): Promise<FIRMSHotspot[]> {
     const product = SENSOR_MAP[sensor] || 'VIIRS_SNPP_NRT';
     const bbox = REGION_BBOX[region] || REGION_BBOX['South Asia'];
-    const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${this.apiKey}/${product}/${bbox}/${days}`;
+    const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${key}/${product}/${bbox}/${days}`;
 
     const response = await fetch(url, {
-      signal: AbortSignal.timeout(12000),
+      signal: AbortSignal.timeout(15000),
     });
 
     if (!response.ok) {
-      throw new Error(`FIRMS API responded with ${response.status}`);
+      throw new Error(`FIRMS API responded with HTTP ${response.status}`);
     }
 
     const csvText = await response.text();
